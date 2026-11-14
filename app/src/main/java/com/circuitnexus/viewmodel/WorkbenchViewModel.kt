@@ -25,6 +25,7 @@ import com.circuitnexus.export.ExportEngine
 import com.circuitnexus.model.Circuit
 import com.circuitnexus.model.CircuitComponent
 import com.circuitnexus.model.CircuitWire
+import com.circuitnexus.model.ComponentProperties
 import com.circuitnexus.model.ComponentType
 import com.circuitnexus.model.SimulationState
 import com.circuitnexus.model.SimulationWarning
@@ -90,6 +91,22 @@ class WorkbenchViewModel(
 
     private val _netlistLines = MutableStateFlow<List<String>>(emptyList())
     val netlistLines = _netlistLines.asStateFlow()
+
+    // ===== Borradores del panel de piezas =====
+    private val _draftResistance = MutableStateFlow(330f)
+    val draftResistance = _draftResistance.asStateFlow()
+
+    private val _draftLedColor = MutableStateFlow("red")
+    val draftLedColor = _draftLedColor.asStateFlow()
+
+    private val _draftBatteryVolts = MutableStateFlow(9f)
+    val draftBatteryVolts = _draftBatteryVolts.asStateFlow()
+
+    private val _draftTimerFrequency = MutableStateFlow(1f)
+    val draftTimerFrequency = _draftTimerFrequency.asStateFlow()
+
+    private val _draftCapacitance = MutableStateFlow(100f) // µF
+    val draftCapacitance = _draftCapacitance.asStateFlow()
 
     // ===== Tutorial =====
     private val _tutorialStep = MutableStateFlow<TutorialStep?>(null)
@@ -214,6 +231,7 @@ class WorkbenchViewModel(
         simulationJob?.cancel()
         simulationJob = viewModelScope.launch {
             var tick = 0
+            var frame = 0
             while (true) {
                 val now = System.nanoTime()
                 val dtSeconds = ((now - lastFrameNanos) / 1_000_000_000.0).coerceAtMost(0.05)
@@ -223,12 +241,17 @@ class WorkbenchViewModel(
                     val comps = _components.value
                     val wrs = _wires.value
                     if (comps.isNotEmpty()) {
-                        // Varios pasos por frame para que se vea el movimiento
+                        // Reconstruye la matriz solo si cambió el circuito
+                        transientEngine.updateTopology(comps, wrs)
+                        // Pasos baratos sin calcular estado ni historial
                         repeat(6) {
-                            transientEngine.step(comps, wrs)
+                            transientEngine.step(comps, wrs, computeState = false, record = false)
                         }
-                        val result = transientEngine.step(comps, wrs)
-                        if (result.success) {
+                        // Un paso final completo para la UI y el osciloscopio
+                        val result = transientEngine.step(comps, wrs, computeState = true, record = true)
+                        frame++
+                        // Publicamos a ~30 fps: suficiente para verse fluido y ahorra batería
+                        if (result.success && frame % 2 == 0) {
                             _simulationState.value = SimulationState(
                                 isRunning = true,
                                 nodeVoltages = result.nodeVoltages,
@@ -425,7 +448,8 @@ class WorkbenchViewModel(
 
     fun addComponent(type: ComponentType, x: Float, y: Float) {
         val snapped = snapToGrid(x, y)
-        val component = CircuitComponent.createDefault(type, circuitId, snapped.first, snapped.second)
+        val base = CircuitComponent.createDefault(type, circuitId, snapped.first, snapped.second)
+        val component = base.copy(properties = applyDrafts(base.properties, type))
         _showLibrary.value = false
         _components.value = _components.value + component
 
@@ -512,6 +536,39 @@ class WorkbenchViewModel(
             _components.value.find { it.id == componentId }?.let { repository.updateComponent(it) }
         }
     }
+
+    // ===== Panel de piezas =====
+
+    fun setDraftResistance(ohms: Float) {
+        _draftResistance.value = ohms.coerceIn(1f, 1_000_000f)
+    }
+
+    fun setDraftLedColor(color: String) {
+        _draftLedColor.value = color
+        hapticManager?.lightClick()
+    }
+
+    fun setDraftBatteryVolts(volts: Float) {
+        _draftBatteryVolts.value = volts.coerceIn(1.5f, 24f)
+    }
+
+    fun setDraftTimerFrequency(hz: Float) {
+        _draftTimerFrequency.value = hz.coerceIn(0.1f, 100f)
+    }
+
+    fun setDraftCapacitance(microFarads: Float) {
+        _draftCapacitance.value = microFarads.coerceIn(0.1f, 10_000f)
+    }
+
+    private fun applyDrafts(base: ComponentProperties, type: ComponentType): ComponentProperties =
+        when (type) {
+            ComponentType.RESISTOR -> base.copy(resistanceOhms = _draftResistance.value)
+            ComponentType.LED -> base.copy(ledColor = _draftLedColor.value)
+            ComponentType.BATTERY -> base.copy(voltageVolts = _draftBatteryVolts.value)
+            ComponentType.TIMER_555 -> base.copy(frequencyHz = _draftTimerFrequency.value)
+            ComponentType.CAPACITOR -> base.copy(capacitanceFarads = _draftCapacitance.value / 1e6f)
+            else -> base
+        }
 
     // ===== Cables =====
 

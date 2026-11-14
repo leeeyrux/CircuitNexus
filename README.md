@@ -29,7 +29,12 @@ los ve encenderse de verdad, y entiende el porqué en palabras de todos los día
 - Arrastra piezas; se alinean a la cuadrícula
 - Cables curvos que **cambian de color** cuando pasa energía
 - **Partículas de energía** recorriendo los cables; se frenan en resistencias y brillan en LEDs
-- Cajón inferior con piezas rápidas + **plantillas** de circuitos famosos
+- **Panel deslizable de piezas** (bottom sheet) con esquinas de 30 dp, vidrio carbón,
+  píldora de arrastre, piezas en cápsulas y **ajustes rápidos inline** (resistencia,
+  color del LED, voltaje, pulso del 555, capacitor). Toca o saca una pieza para
+  colocarla al instante en la mesa, con vibración sutil
+- Piezas esenciales con nombres claros ("Cerebro de Pulsos" para el 555, "Perilla Reguladora"…)
+- **Plantillas** de circuitos famosos desde el mismo panel
 - Panel de propiedades al tocar una pieza (voltaje, resistencia, frecuencia, texto de pantalla…)
 - **Deshacer / Rehacer** de 50 acciones
 
@@ -87,6 +92,12 @@ Más de 50 piezas, con búsqueda y hoja de datos sencilla:
 ### 🤖 Asistente Inteligente (opcional)
 Con tu propia clave de **Groq**, **OpenRouter** o **NVIDIA** (gratis):
 explica qué hace tu circuito y qué le falta, en palabras sencillas.
+
+### ⚡ Rendimiento
+- Matriz del motor reconstruida solo cuando cambia el circuito (hash barato, sin crear textos)
+- Pasos intermedios de simulación sin calcular estado ni historial
+- UI a ~30 fps estables (simulación interna a 60), partículas suaves y batería cuidada
+- Piezas virtualizadas y dibujo por capas (rejilla, partículas, cables, piezas)
 
 ### 📳 Detalles que se sienten
 - Vibración distinta al conectar, al fallar y al completar

@@ -27,7 +27,7 @@ class TransientEngine {
     private val maxHistory = 6000
 
     // Topología
-    private var topoKey: String = ""
+    private var topoHash: Long = 0L
     private var nodeCount = 0
     private var matrixSize = 0
 
@@ -53,7 +53,7 @@ class TransientEngine {
 
     fun reset() {
         currentTime = 0.0
-        topoKey = ""
+        topoHash = 0L
         nodeCount = 0
         matrixSize = 0
         nodeOfPin.clear()
@@ -72,29 +72,45 @@ class TransientEngine {
         lastComponentCurrents.clear()
     }
 
-    /** Asegura que la matriz esté construida para este circuito y paso de tiempo. */
-    fun prepare(
+    /**
+     * Reconstruye la matriz solo si cambió el circuito o el paso de tiempo.
+     * Usa un hash rápido (sin textos) para poder llamarse en cada frame.
+     */
+    fun updateTopology(
         components: List<CircuitComponent>,
         wires: List<CircuitWire>,
         stepSeconds: Double = timeStep
     ) {
-        val key = topologyKey(components, wires)
+        val hash = topologyHash(components, wires)
         val dtChanged = abs(stepSeconds - timeStep) > 1e-12
-        if (key == topoKey && !dtChanged) return
+        if (hash == topoHash && !dtChanged) return
 
         timeStep = stepSeconds
-        topoKey = key
+        topoHash = hash
         assignNodes(components, wires)
         allocate()
         buildLinear(components)
     }
 
-    /** Avanza un paso de simulación. */
+    /** Compatibilidad: igual que updateTopology. */
+    fun prepare(
+        components: List<CircuitComponent>,
+        wires: List<CircuitWire>,
+        stepSeconds: Double = timeStep
+    ) = updateTopology(components, wires, stepSeconds)
+
+    /**
+     * Avanza un paso de simulación.
+     * @param computeState si es true calcula voltajes/corrientes para la UI (caro)
+     * @param record si es true guarda historial para el osciloscopio
+     */
     fun step(
         components: List<CircuitComponent>,
-        wires: List<CircuitWire>
+        wires: List<CircuitWire>,
+        computeState: Boolean = true,
+        record: Boolean = true
     ): TransientResult {
-        prepare(components, wires)
+        if (gLinear.isEmpty()) updateTopology(components, wires)
 
         val gWork = Array(matrixSize) { gLinear[it].copyOf() }
         rhs.fill(0.0)
@@ -191,8 +207,12 @@ class TransientEngine {
         sol = solved
         currentTime += timeStep
 
+        if (!computeState) {
+            return TransientResult(success = true, time = currentTime, timeStep = timeStep)
+        }
+
         val state = buildState(components, wires)
-        recordHistory()
+        if (record) recordHistory()
         return TransientResult(
             success = true,
             time = currentTime,
@@ -239,17 +259,41 @@ class TransientEngine {
 
     // ===== Topología =====
 
-    private fun topologyKey(components: List<CircuitComponent>, wires: List<CircuitWire>): String {
-        val sb = StringBuilder()
+    /**
+     * Hash barato de la topología + propiedades eléctricas.
+     * Evita crear cadenas en cada frame (clave para mantener 60 fps).
+     */
+    private fun topologyHash(components: List<CircuitComponent>, wires: List<CircuitWire>): Long {
+        var h = 1125899906842597L // primo base
+        h = h * 31 + components.size
         for (c in components) {
-            sb.append(c.id).append(c.type.ordinal).append(c.properties.toString()).append('|')
+            h = h * 31 + c.id
+            h = h * 31 + c.type.ordinal
+            val p = c.properties
+            h = h * 31 + (p.resistanceOhms?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.capacitanceFarads?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.inductanceHenries?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.voltageVolts?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.currentAmps?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.potPosition?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.sensorValue?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.frequencyHz?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.dutyCycle?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (if (p.isNormallyOpen) 1 else 0)
+            h = h * 31 + (p.ledColor?.hashCode() ?: 0)
+            h = h * 31 + (p.forwardVoltage?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.ledForwardVoltage?.toRawBits()?.toLong() ?: 0L)
+            h = h * 31 + (p.breakdownVoltage?.toRawBits()?.toLong() ?: 0L)
         }
-        sb.append('#')
+        h = h * 31 + wires.size
         for (w in wires) {
-            sb.append(w.fromComponentId).append('.').append(w.fromPinIndex)
-                .append('-').append(w.toComponentId).append('.').append(w.toPinIndex).append(';')
+            h = h * 31 + w.id
+            h = h * 31 + w.fromComponentId
+            h = h * 31 + w.fromPinIndex
+            h = h * 31 + w.toComponentId
+            h = h * 31 + w.toPinIndex
         }
-        return sb.toString()
+        return h
     }
 
     private fun assignNodes(components: List<CircuitComponent>, wires: List<CircuitWire>) {

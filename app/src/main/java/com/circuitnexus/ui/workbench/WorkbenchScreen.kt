@@ -49,6 +49,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.circuitnexus.engine.HelpCard
@@ -64,6 +65,7 @@ import com.circuitnexus.ui.library.LibraryScreen
 import com.circuitnexus.ui.multimeter.ProMultimeter
 import com.circuitnexus.ui.oscilloscope.OscilloscopeScreen
 import com.circuitnexus.ui.theme.CircuitColors
+import com.circuitnexus.util.HapticFeedback
 import com.circuitnexus.ui.theme.CircuitShapes
 import com.circuitnexus.viewmodel.WorkbenchViewModel
 import kotlin.math.abs
@@ -103,6 +105,11 @@ fun WorkbenchScreen(
     val isRunning by viewModel.isRunning.collectAsStateWithLifecycle()
     val tutorialStep by viewModel.tutorialStep.collectAsStateWithLifecycle()
     val tutorialProgress by viewModel.tutorialProgress.collectAsStateWithLifecycle()
+    val draftResistance by viewModel.draftResistance.collectAsStateWithLifecycle()
+    val draftLedColor by viewModel.draftLedColor.collectAsStateWithLifecycle()
+    val draftBatteryVolts by viewModel.draftBatteryVolts.collectAsStateWithLifecycle()
+    val draftTimerFrequency by viewModel.draftTimerFrequency.collectAsStateWithLifecycle()
+    val draftCapacitance by viewModel.draftCapacitance.collectAsStateWithLifecycle()
 
     val density = LocalDensity.current.density
     var draggingId by remember { mutableStateOf<Long?>(null) }
@@ -110,14 +117,16 @@ fun WorkbenchScreen(
     var showDrc by remember { mutableStateOf(false) }
     var showExport by remember { mutableStateOf(false) }
     var showNetlist by remember { mutableStateOf(false) }
-    var showTemplates by remember { mutableStateOf(false) }
+    var showPartsSheet by remember { mutableStateOf(false) }
+    var canvasSizePx by remember { mutableStateOf(IntSize.Zero) }
+    val haptic = HapticFeedback.rememberHaptic()
 
     Box(modifier = Modifier.fillMaxSize().background(CircuitColors.Background)) {
         // ================= LIENZO =================
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .onSizeChanged { }
+                .onSizeChanged { canvasSizePx = it }
                 .pointerInput(Unit) {
                     detectTransformGestures { _, pan, zoomChange, _ ->
                         val state = viewModel.panZoom.value
@@ -290,18 +299,98 @@ fun WorkbenchScreen(
             NetlistOverlay(lines = netlist, onClose = { showNetlist = false })
         }
 
-        // ================= CAJÓN INFERIOR =================
-        BottomDrawer(
-            showTemplates = showTemplates,
-            onToggleTemplates = { showTemplates = !showTemplates },
-            onPick = { type -> viewModel.addComponent(type, 120f, 160f) },
-            onLibrary = { viewModel.toggleLibrary() },
-            onTemplate = { template ->
-                viewModel.loadTemplate(template)
-                showTemplates = false
-            },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        // ================= BOTÓN FLOTANTE DE PIEZAS =================
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Píldora principal: abre el panel
+            Row(
+                modifier = Modifier
+                    .height(52.dp)
+                    .background(CircuitColors.Surface.copy(alpha = 0.97f), CircuitShapes.PillShape)
+                    .border(1.dp, CircuitColors.Outline, CircuitShapes.PillShape)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            haptic.lightClick()
+                            showPartsSheet = true
+                        }
+                    }
+                    .padding(horizontal = 18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("🧩", fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        "Piezas",
+                        color = CircuitColors.OnSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.W700
+                    )
+                    Text(
+                        "Desliza para abrir",
+                        color = CircuitColors.OnSurfaceVariant,
+                        fontSize = 8.sp
+                    )
+                }
+            }
+            // Acceso rápido a plantillas
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(CircuitColors.Surface.copy(alpha = 0.97f), CircleShape)
+                    .border(1.dp, CircuitColors.Outline, CircleShape)
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            haptic.lightClick()
+                            showPartsSheet = true
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("📋", fontSize = 18.sp)
+            }
+        }
+
+        // ================= PANEL DESLIZABLE DE PIEZAS =================
+        if (showPartsSheet) {
+            // Centro visible del lienzo para colocar la pieza
+            val centerWorldX = ((canvasSizePx.width / 2f / density) - panZoom.panX) / panZoom.zoom
+            val centerWorldY = ((canvasSizePx.height / 2f / density) - panZoom.panY) / panZoom.zoom
+            // Pequeño desfase para que no se apilen en el mismo punto
+            val spread = (components.size % 3) * 30f - 30f
+            PartsBottomSheet(
+                worldX = centerWorldX + spread,
+                worldY = centerWorldY + spread,
+                templates = CircuitTemplates.ALL_TEMPLATES,
+                draftResistance = draftResistance,
+                draftLedColor = draftLedColor,
+                draftBatteryVolts = draftBatteryVolts,
+                draftTimerFrequency = draftTimerFrequency,
+                draftCapacitance = draftCapacitance,
+                onResistance = { viewModel.setDraftResistance(it) },
+                onLedColor = { viewModel.setDraftLedColor(it) },
+                onBatteryVolts = { viewModel.setDraftBatteryVolts(it) },
+                onTimerFrequency = { viewModel.setDraftTimerFrequency(it) },
+                onCapacitance = { viewModel.setDraftCapacitance(it) },
+                onAdd = { type ->
+                    viewModel.addComponent(type, centerWorldX + spread, centerWorldY + spread)
+                },
+                onTemplate = { template ->
+                    viewModel.loadTemplate(template)
+                    showPartsSheet = false
+                },
+                onOpenLibrary = {
+                    showPartsSheet = false
+                    viewModel.toggleLibrary()
+                },
+                onDismiss = { showPartsSheet = false }
+            )
+        }
 
         // ================= DRC =================
         if (showDrc) {
@@ -593,17 +682,40 @@ private fun ComponentNode(
             contentAlignment = Alignment.Center
         ) {
             if (component.type.category == com.circuitnexus.model.ComponentCategory.DISPLAY) {
-                // Las pantallas muestran su texto en lugar del icono
-                Text(
-                    text = component.properties.text?.take(10) ?: component.type.emoji,
-                    color = CircuitColors.Emerald,
-                    fontSize = (9f * zoom).coerceIn(6f, 14f).sp,
-                    fontWeight = FontWeight.W700,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(4.dp)
-                )
+                // Pantallas con aspecto de LCD real (fondo verdoso y dígitos de fósforo)
+                val screenColor = when (component.type) {
+                    ComponentType.LCD_16X2 -> Color(0xFF0A2A12)
+                    ComponentType.OLED_SSD1306 -> Color(0xFF050505)
+                    else -> Color(0xFF07180D)
+                }
+                val screenText = when (component.type) {
+                    ComponentType.LCD_16X2, ComponentType.OLED_SSD1306 ->
+                        (component.properties.text ?: "CircuitNexus").take(20)
+                    ComponentType.DISPLAY_7SEG_10 -> "0000000000"
+                    ComponentType.DISPLAY_7SEG_8 -> "00000000"
+                    ComponentType.DISPLAY_7SEG_4 -> "0000"
+                    else -> component.properties.text?.take(12) ?: component.type.emoji
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding((4f * zoom).coerceIn(2f, 8f).dp)
+                        .background(screenColor, CircuitShapes.SmallShape)
+                        .border(1.dp, CircuitColors.Emerald.copy(alpha = 0.25f), CircuitShapes.SmallShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = screenText,
+                        color = CircuitColors.Emerald,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        fontSize = (8f * zoom).coerceIn(5f, 13f).sp,
+                        fontWeight = FontWeight.W700,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(3.dp)
+                    )
+                }
             } else {
                 Text(
                     component.type.emoji,
@@ -753,137 +865,6 @@ private fun ActionChip(text: String, color: Color, onClick: () -> Unit) {
             .padding(horizontal = 11.dp, vertical = 7.dp)
     ) {
         Text(text, color = color, fontSize = 10.sp, fontWeight = FontWeight.W700)
-    }
-}
-
-// ================= CAJÓN INFERIOR =================
-
-@Composable
-private fun BottomDrawer(
-    showTemplates: Boolean,
-    onToggleTemplates: () -> Unit,
-    onPick: (ComponentType) -> Unit,
-    onLibrary: () -> Unit,
-    onTemplate: (CircuitTemplate) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(if (showTemplates) 214.dp else 132.dp)
-            .background(CircuitColors.Surface)
-            .padding(vertical = 8.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    DrawerTab("Piezas", !showTemplates, onToggleTemplates)
-                    DrawerTab("Plantillas", showTemplates, onToggleTemplates)
-                }
-                ActionChip("+ Biblioteca completa", CircuitColors.Emerald, onLibrary)
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            if (!showTemplates) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(ComponentType.QUICK_ACCESS) { type ->
-                        QuickPart(type = type, onClick = { onPick(type) })
-                    }
-                }
-            } else {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(CircuitTemplates.ALL_TEMPLATES) { template ->
-                        TemplateCard(template = template, onClick = { onTemplate(template) })
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DrawerTab(text: String, selected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .background(
-                if (selected) CircuitColors.Emerald.copy(alpha = 0.18f) else CircuitColors.SurfaceVariant,
-                CircuitShapes.PillShape
-            )
-            .pointerInput(text) { detectTapGestures { onClick() } }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text,
-            color = if (selected) CircuitColors.Emerald else CircuitColors.OnSurfaceVariant,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.W700
-        )
-    }
-}
-
-@Composable
-private fun QuickPart(type: ComponentType, onClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(74.dp)
-            .background(CircuitColors.SurfaceVariant, CircuitShapes.CardShape)
-            .border(1.dp, CircuitColors.Outline, CircuitShapes.CardShape)
-            .pointerInput(type) { detectTapGestures { onClick() } }
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(type.emoji, fontSize = 22.sp)
-        Text(
-            type.displayName,
-            color = CircuitColors.OnSurface,
-            fontSize = 8.sp,
-            fontWeight = FontWeight.W600,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 2.dp)
-        )
-    }
-}
-
-@Composable
-private fun TemplateCard(template: CircuitTemplate, onClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(112.dp)
-            .background(CircuitColors.SurfaceVariant, CircuitShapes.CardShape)
-            .border(1.dp, CircuitColors.Outline, CircuitShapes.CardShape)
-            .pointerInput(template.id) { detectTapGestures { onClick() } }
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(template.thumbnailEmoji, fontSize = 22.sp)
-        Text(
-            template.name,
-            color = CircuitColors.OnSurface,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.W700,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 2.dp)
-        )
-        Text(
-            "${template.estimatedTimeMinutes} min",
-            color = CircuitColors.OnSurfaceVariant,
-            fontSize = 8.sp
-        )
     }
 }
 
