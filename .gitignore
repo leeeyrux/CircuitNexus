@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+/*/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Configuración local
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Salidas de compilación
+*.apk
+*.aab
+*.hprof
+
+# Room
+schemas/

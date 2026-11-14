@@ -1,0 +1,128 @@
+<resources>
+    <string name="app_name">CircuitNexus</string>
+    <string name="app_name_short">CircuitNexus</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">CircuitNexus</string>
+    <string name="home_subtitle">Toca + para empezar tu primer circuito</string>
+    <string name="home_empty_title">No hay circuitos aún</string>
+    <string name="home_empty_message">Tu mesa de trabajo está lista. ¡Crea tu primer circuito!</string>
+    <string name="home_new_circuit">+ Empezar Nuevo Circuito</string>
+    <string name="home_search_hint">Buscar circuitos…</string>
+    <string name="home_filter_favorites">Favoritos</string>
+
+    <!-- Workbench -->
+    <string name="workbench_title">Mesa de Trabajo</string>
+    <string name="workbench_hint">Toca una pieza para seleccionar • Arrastra para mover • Toca dos puntos para conectar</string>
+    <string name="workbench_status_ready">● Todo bien ✓</string>
+    <string name="workbench_status_warning">● Revisa las advertencias</string>
+    <string name="workbench_status_danger">● ¡Peligro detectado!</string>
+    <string name="workbench_ai_button">¿Está bien conectado?</string>
+
+    <!-- Parts Drawer -->
+    <string name="parts_drawer_title">Piezas disponibles (arrastra al centro)</string>
+
+    <!-- Learn Screen -->
+    <string name="learn_title">Aprender</string>
+    <string name="learn_subtitle">Elige un tema para empezar</string>
+
+    <!-- Parts Screen -->
+    <string name="parts_title">Piezas</string>
+    <string name="parts_subtitle">Conoce cada componente y para qué sirve</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_subtitle">Personaliza tu experiencia</string>
+    <string name="settings_ai_title">Asistente Inteligente (Opcional)</string>
+    <string name="settings_ai_description">Conecta tu propia clave API para que la IA te explique circuitos, diagnostique problemas y sugiera experimentos. Funciona con Groq, OpenRouter o NVIDIA (gratis).</string>
+    <string name="settings_ai_provider_groq">Groq (Rápido, Gratis)</string>
+    <string name="settings_ai_provider_openrouter">OpenRouter (Muchos modelos)</string>
+    <string name="settings_ai_provider_nvidia">NVIDIA (Nemotron, Gratis)</string>
+    <string name="settings_ai_api_key_hint">Pega tu clave API aquí…</string>
+    <string name="settings_ai_test_button">Probar</string>
+    <string name="settings_ai_save_button">Guardar</string>
+    <string name="settings_ai_clear_button">Borrar</string>
+    <string name="settings_ai_connected">✓ Conectado</string>
+    <string name="settings_ai_error">✗ Error</string>
+
+    <string name="settings_workbench_title">Mesa de Trabajo</string>
+    <string name="settings_grid_show">Mostrar cuadrícula</string>
+    <string name="settings_grid_show_desc">Puntos guía para alinear piezas</string>
+    <string name="settings_grid_snap">Ajustar a cuadrícula</string>
+    <string name="settings_grid_snap_desc">Las piezas se alinean automáticamente</string>
+    <string name="settings_grid_size">Tamaño de cuadrícula</string>
+    <string name="settings_grid_size_desc">Distancia entre puntos (px)</string>
+    <string name="settings_auto_simulate">Simulación automática</string>
+    <string name="settings_auto_simulate_desc">Calcula voltajes y corrientes en tiempo real</string>
+
+    <string name="settings_feedback_title">Retroalimentación</string>
+    <string name="settings_haptic">Vibración al tocar</string>
+    <string name="settings_haptic_desc">Pequeña vibración al conectar piezas</string>
+
+    <string name="settings_about_title">Acerca de</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_engine">Motor</string>
+    <string name="settings_design">Diseño</string>
+    <string name="settings_philosophy">Filosofía</string>
+
+    <!-- Component Names (Friendly) -->
+    <string name="comp_battery">Batería / Energía</string>
+    <string name="comp_ground">Negativo / Tierra</string>
+    <string name="comp_resistor">Resistencia</string>
+    <string name="comp_led">Luz LED</string>
+    <string name="comp_capacitor">Capacitor</string>
+    <string name="comp_switch">Botón / Interruptor</string>
+    <string name="comp_timer555">Chip Temporizador 555</string>
+
+    <!-- Component Descriptions -->
+    <string name="desc_battery">La fuente de toda la energía. Como un tanque de agua a presión.</string>
+    <string name="desc_ground">El retorno de la energía. El punto de referencia (cero voltios).</string>
+    <string name="desc_resistor">Pone freno a la energía. Protege a los componentes delicados.</string>
+    <string name="desc_led">Se ilumina cuando pasa energía. ¡La recompensa visual!</string>
+    <string name="desc_capacitor">Un pequeño depósito que se llena y vacía despacio. Crea retardos.</string>
+    <string name="desc_switch">Tú decides cuándo pasa la energía. Abre o cierra el camino.</string>
+    <string name="desc_timer555">El cerebro que crea ritmos. Hace parpadear, temporizar, repetir.</string>
+
+    <!-- Help Messages -->
+    <string name="help_welcome_title">¡Bienvenido a tu Mesa de Trabajo!</string>
+    <string name="help_welcome_message">Arrastra piezas del cajón de abajo para empezar tu primer circuito.</string>
+    <string name="help_welcome_action">Abre el cajón de piezas 👇</string>
+
+    <string name="help_no_battery_title">Falta energía</string>
+    <string name="help_no_battery_message">Tienes piezas que necesitan energía pero no hay ninguna Batería conectada.</string>
+    <string name="help_no_battery_action">Añade una Batería del cajón de piezas</string>
+
+    <string name="help_no_ground_title">Falta el retorno</string>
+    <string name="help_no_ground_message">La Batería necesita un camino de vuelta (Negativo/Tierra) para que fluya la energía.</string>
+    <string name="help_no_ground_action">Conecta el Negativo (−) de la Batería a una Tierra</string>
+
+    <string name="help_led_danger_title">LED en peligro</string>
+    <string name="help_led_danger_message">Esta Luz LED está conectada directo a la Batería sin protección. Se quemará en segundos.</string>
+    <string name="help_led_danger_action">Pon una Resistencia de 330 Ω entre la Batería y el LED</string>
+
+    <string name="help_shortcut_title">¡Peligro! Cortocircuito</string>
+    <string name="help_shortcut_message">¡Atención! Estás uniendo positivo y negativo directo. La Batería se calentará y agotará rápido.</string>
+    <string name="help_shortcut_action">Siempre pon algo que use la energía (Resistencia, LED, etc.) entre positivo y negativo.</string>
+
+    <!-- Common Actions -->
+    <string name="action_open">Abrir</string>
+    <string name="action_duplicate">Hacer Copia</string>
+    <string name="action_delete">Borrar</string>
+    <string name="action_favorite">Favorito</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_done">Entendido</string>
+    <string name="action_start">Empezar</string>
+
+    <!-- Measurements -->
+    <string name="measure_voltage">Voltaje</string>
+    <string name="measure_current">Corriente</string>
+    <string name="measure_power">Potencia</string>
+    <string name="unit_volts">V</string>
+    <string name="unit_milliamps">mA</string>
+    <string name="unit_milliwatts">mW</string>
+    <string name="unit_ohms">Ω</string>
+    <string name="unit_microfarads">µF</string>
+    <string name="unit_hertz">Hz</string>
+    <string name="unit_percent">%</string>
+</resources>

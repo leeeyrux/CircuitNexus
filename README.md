@@ -1,0 +1,185 @@
+# CircuitNexus ⚡
+
+**Simulador de electrónica para principiantes: cálido, minimalista y sin tecnicismos.**
+
+> *"Cero tecnicismos, máxima claridad. Nunca debes sentirte en una cabina de avión."*
+
+---
+
+## 🎯 La idea
+
+CircuitNexus nace de una pregunta: **¿por qué aprender electrónica tiene que dar miedo?**
+
+Aquí no hay "netlist", "GND", "VCC" ni "nodos". Hay **Batería**, **Negativo/Tierra**,
+**Perilla Reguladora** y **Revisar mi Circuito**. El usuario arma circuitos de verdad,
+los ve encenderse de verdad, y entiende el porqué en palabras de todos los días.
+
+---
+
+## ✨ Qué hace (v1.0)
+
+### 🏠 Mis Circuitos
+- Tarjetas carbón mate con nombre, fecha y acciones (abrir, copiar, borrar, favorito)
+- Buscador y filtro de favoritos
+- Botón principal verde esmeralda: **+ Empezar Nuevo Circuito**
+
+### 🛠️ Mesa de trabajo 2D
+- Lienzo OLED negro con cuadrícula sutil, pan y zoom suaves
+- Piezas con puntos de conexión: tocas un punto y luego otro y **se crea el cable**
+- Arrastra piezas; se alinean a la cuadrícula
+- Cables curvos que **cambian de color** cuando pasa energía
+- **Partículas de energía** recorriendo los cables; se frenan en resistencias y brillan en LEDs
+- Cajón inferior con piezas rápidas + **plantillas** de circuitos famosos
+- Panel de propiedades al tocar una pieza (voltaje, resistencia, frecuencia, texto de pantalla…)
+- **Deshacer / Rehacer** de 50 acciones
+
+### 📈 Osciloscopio
+- 2–4 canales de colores
+- Base de tiempo ajustable (10 µs → 5 s)
+- Escala vertical ajustable
+- **Disparo** por flanco con nivel
+- **Persistencia de fósforo** (estela analógica)
+- Modo **XY** (figuras de Lissajous)
+- **Cursores** de tiempo y voltaje con lectura ΔT / ΔV / frecuencia
+- Medidas automáticas: Vpp, Vrms, Vmedio, frecuencia
+
+### 📐 Multímetro
+- Voltaje continuo y alterno
+- Corriente (mA/A)
+- Resistencia (Ω) y **continuidad** con aviso sonoro visual
+- Diodo y frecuencia
+- **HOLD**, **relativo (REL)**, **MIN/MAX**
+- Barra analógica + **gráfico de historial**
+- Se abre tocando cualquier cable
+
+### 🔍 Revisar mi Circuito (DRC)
+Revisión automática con lenguaje cotidiano:
+- Pines sueltos y piezas sin conectar
+- Cortocircuitos positivo/negativo
+- LEDs sin resistencia
+- Chips sin alimentación
+- Polaridad de capacitores
+- Puntaje 0–100 y sugerencia para cada problema
+
+### 📚 Biblioteca de piezas
+Más de 50 piezas, con búsqueda y hoja de datos sencilla:
+- **Energía**: batería, fuente de corriente, tierra
+- **Pasivas**: resistencia, **perilla reguladora**, capacitor, bobina, transformador, sensor de calor, sensor de luz, protector de picos
+- **Semiconductores**: LED, diodo, Zener, Schottky, transistores NPN/PNP, interruptores de energía N/P, JFET, IGBT
+- **Control**: interruptor, relé
+- **Chips**: 555, amplificador operacional, comparador, reguladores, compuerta lógica, contador, desplazador
+- **Salidas**: motor, servomotor, motor paso a paso, zumbador, electroimán
+- **Sensores**: temperatura, distancia, movimiento
+- **Pantallas**: números de **4, 8 y 10 dígitos**, texto LCD, OLED, tira de luces de colores
+- **Conectores**: pines, bornera, audio, USB
+
+### 📤 Compartir / Guardar
+- JSON (copia completa, para reimportar)
+- Netlist SPICE (.cir) para otros simuladores
+- Esquemático KiCad
+- SVG vectorial del circuito
+- CSV con las medidas
+- Markdown "receta" del circuito
+
+### 🎓 Tutorial interactivo
+"Primeros Pasos" (10 pasos) y "Parpadeo con 555", con progreso y validación automática.
+
+### 🤖 Asistente Inteligente (opcional)
+Con tu propia clave de **Groq**, **OpenRouter** o **NVIDIA** (gratis):
+explica qué hace tu circuito y qué le falta, en palabras sencillas.
+
+### 📳 Detalles que se sienten
+- Vibración distinta al conectar, al fallar y al completar
+- 60 fps con virtualización de dibujo
+- Todo funciona **sin internet** (la IA es opcional)
+
+---
+
+## 🧠 Motor de simulación
+
+- **Análisis Nodal Modificado (MNA)** en Kotlin puro
+- Modelos compañeros de **Euler hacia atrás** (estables)
+- Memoria de capacitores y bobinas
+- Diodos, LEDs y Zener por tramos
+- 555 como generador de onda cuadrada
+- Amplificador operacional como fuente controlada
+- Punto de operación en continua + simulación transitoria
+- Resolución con eliminación gaussiana y pivoteo parcial
+- Corre en un hilo de fondo y alimenta osciloscopio y multímetro a ~60 fps
+
+---
+
+## 🎨 Identidad visual
+
+| Uso | Color |
+|---|---|
+| Fondo | Negro OLED `#000000` |
+| Tarjetas | Carbón mate `#121417` |
+| Borde | `#1E2228` |
+| Crear / correcto | **Esmeralda** `#00E676` |
+| Consejo / aviso | **Ámbar** `#FF9100` |
+| Medición / info | **Cian** `#00B0FF` |
+| Peligro | **Coral** `#FF5252` |
+| Texto suave | Gris `#9E9E9E` |
+
+Tarjetas de 20 dp de radio, botones y navegación en píldora de 50 dp.
+
+---
+
+## 🏗️ Estructura
+
+```
+app/src/main/java/com/circuitnexus/
+├── model/        Circuito, piezas, propiedades, cables
+├── data/         Room (DAO, base de datos), repositorio, DataStore
+├── engine/       Motor DC, motor transitorio, ayuda offline, IA, DRC
+├── export/       JSON, SPICE, KiCad, SVG, CSV, Markdown
+├── command/      Deshacer/Rehacer (Command Pattern)
+├── particles/    Partículas de energía y brillo
+├── templates/    Plantillas de circuitos famosos
+├── viewmodel/    Home, Workbench, Learn, Parts, Settings, Tutorial
+├── ui/
+│   ├── home/ learn/ parts/ settings/
+│   ├── workbench/    Lienzo + instrumentos
+│   ├── oscilloscope/ Osciloscopio
+│   ├── multimeter/   Multímetro
+│   ├── library/      Biblioteca de piezas
+│   ├── tutorial/     Tutorial
+│   ├── theme/        Paleta, tipografía, formas
+│   └── common/       Componentes compartidos
+├── navigation/   NavHost + barra flotante
+├── di/           Inyección manual
+├── util/         Vibración
+├── CircuitNexusApplication.kt
+└── MainActivity.kt
+```
+
+---
+
+## 🚀 Cómo compilar
+
+Requisitos: Android Studio Koala+ (AGP 8.5), JDK 17, SDK 34, mínimo Android 8.0 (API 26).
+
+```bash
+# 1. Abre la carpeta en Android Studio
+# 2. Gradle sincroniza dependencias
+# 3. Run ▶
+```
+
+**Pendiente de añadir manualmente** (binarios que no se versionan aquí):
+- `gradle/wrapper/gradle-wrapper.jar` → ejecuta `gradle wrapper` o deja que Android Studio lo genere
+- Iconos de la app (opcional; el proyecto compila sin ellos) → `res/mipmap-*/ic_launcher.png`
+
+---
+
+## 🗺️ Siguiente fase
+
+- Estabilidad y rendimiento en dispositivos reales
+- Más modelos de chips (74HC, LCD real, servos con PWM)
+- Vista de protoboard / 3D reutilizando el mismo motor
+- Retos y laboratorio guiado (fase educativa)
+- Compartir circuitos con enlace
+
+---
+
+Hecho con cariño para gente curiosa. 💚
