@@ -1,0 +1,40 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: APK de depuración
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Preparar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+
+      - name: Dar permisos al lanzador
+        run: chmod +x gradlew
+
+      - name: Compilar
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Subir APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CircuitNexus-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

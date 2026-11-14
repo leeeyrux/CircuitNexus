@@ -1,5 +1,7 @@
 # CircuitNexus ⚡
 
+![Compilar APK](https://github.com/TU_USUARIO/CircuitNexus/actions/workflows/build.yml/badge.svg)
+
 **Simulador de electrónica para principiantes: cálido, minimalista y sin tecnicismos.**
 
 > *"Cero tecnicismos, máxima claridad. Nunca debes sentirte en una cabina de avión."*
@@ -19,6 +21,7 @@ los ve encenderse de verdad, y entiende el porqué en palabras de todos los día
 ## ✨ Qué hace (v1.0)
 
 ### 🏠 Mis Circuitos
+- Al abrir por primera vez ya hay **3 circuitos de ejemplo** listos para explorar
 - Tarjetas carbón mate con nombre, fecha y acciones (abrir, copiar, borrar, favorito)
 - Buscador y filtro de favoritos
 - Botón principal verde esmeralda: **+ Empezar Nuevo Circuito**
@@ -172,19 +175,31 @@ app/src/main/java/com/circuitnexus/
 
 ---
 
-## 🚀 Cómo compilar
+## 🚀 Cómo compilar (incluso sin PC)
 
-Requisitos: Android Studio Koala+ (AGP 8.5), JDK 17, SDK 34, mínimo Android 8.0 (API 26).
+Requisitos en local: Android Studio Koala+ (AGP 8.2.2), JDK 17, SDK 34, mínimo Android 8.0 (API 26).
 
+### Opción A — Sin PC: GitHub compila el APK por ti
+
+1. Sube el proyecto a GitHub (`main`).
+2. Entra en la pestaña **Actions → Compilar APK**.
+3. Al terminar, abre el job y descarga el artefacto **CircuitNexus-debug**.
+4. Dentro está `app-debug.apk`: pásalo al teléfono e instálalo (permitiendo "instalar desde esta fuente").
+
+También puedes crear una versión con nombre:
 ```bash
-# 1. Abre la carpeta en Android Studio
-# 2. Gradle sincroniza dependencias
-# 3. Run ▶
+git tag v1.0.0
+git push origin v1.0.0
+```
+Eso dispara **Publicar versión** y deja el APK adjunto en *Releases*.
+
+### Opción B — Con PC
+```bash
+./gradlew assembleDebug
+# APK en app/build/outputs/apk/debug/app-debug.apk
 ```
 
-**Pendiente de añadir manualmente** (binarios que no se versionan aquí):
-- `gradle/wrapper/gradle-wrapper.jar` → ejecuta `gradle wrapper` o deja que Android Studio lo genere
-- Iconos de la app (opcional; el proyecto compila sin ellos) → `res/mipmap-*/ic_launcher.png`
+> El proyecto ya incluye `gradlew`, `gradlew.bat` y `gradle/wrapper/gradle-wrapper.jar`.
 
 ---
 

@@ -8,6 +8,8 @@ import androidx.room.TypeConverters
 import com.circuitnexus.model.Circuit
 import com.circuitnexus.model.CircuitComponent
 import com.circuitnexus.model.CircuitWire
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
