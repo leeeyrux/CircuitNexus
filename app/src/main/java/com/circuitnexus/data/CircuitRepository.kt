@@ -111,6 +111,31 @@ class CircuitRepository(private val database: CircuitDatabase) {
         }
     }
 
+    /**
+     * Reescribe el contenido del circuito conservando los IDs.
+     * Se usa para autoguardado y para que deshacer/rehacer sea persistente.
+     */
+    suspend fun replaceCircuitContents(
+        circuitId: Long,
+        components: List<CircuitComponent>,
+        wires: List<CircuitWire>
+    ) {
+        database.withTransaction {
+            database.wireDao().deleteAllWires(circuitId)
+            database.componentDao().deleteAllComponents(circuitId)
+            if (components.isNotEmpty()) {
+                database.componentDao().insertComponents(
+                    components.map { it.copy(circuitId = circuitId) }
+                )
+            }
+            if (wires.isNotEmpty()) {
+                database.wireDao().insertWires(
+                    wires.map { it.copy(circuitId = circuitId) }
+                )
+            }
+        }
+    }
+
     // Batch operations for templates
     suspend fun addComponents(components: List<CircuitComponent>): List<Long> =
         database.componentDao().insertComponents(components)

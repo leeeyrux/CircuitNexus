@@ -125,8 +125,9 @@ fun AppNavHost(
                 onNavigate = { route ->
                     if (route != currentRoute) {
                         navController.navigate(route) {
-                            popUpTo("home") { saveState = true; inclusive = route == "home" }
+                            popUpTo("home") { saveState = true }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     }
                 },

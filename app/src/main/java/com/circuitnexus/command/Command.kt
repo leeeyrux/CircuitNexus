@@ -71,6 +71,25 @@ data class MoveComponentCommand(
     }
 }
 
+data class RotateComponentCommand(
+    private val repository: CommandRepository,
+    private val componentId: Long,
+    private val oldRotation: Float,
+    private val newRotation: Float,
+    private val x: Float,
+    private val y: Float
+) : Command {
+    override val description = "Girar pieza"
+
+    override fun execute() {
+        repository.updateComponentPosition(componentId, x, y, newRotation)
+    }
+
+    override fun undo() {
+        repository.updateComponentPosition(componentId, x, y, oldRotation)
+    }
+}
+
 data class UpdateComponentPropertyCommand(
     private val repository: CommandRepository,
     private val componentId: Long,

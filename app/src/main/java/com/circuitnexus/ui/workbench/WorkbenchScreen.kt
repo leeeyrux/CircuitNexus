@@ -110,6 +110,7 @@ fun WorkbenchScreen(
     val draftBatteryVolts by viewModel.draftBatteryVolts.collectAsStateWithLifecycle()
     val draftTimerFrequency by viewModel.draftTimerFrequency.collectAsStateWithLifecycle()
     val draftCapacitance by viewModel.draftCapacitance.collectAsStateWithLifecycle()
+    val saveState by viewModel.saveState.collectAsStateWithLifecycle()
 
     val density = LocalDensity.current.density
     var draggingId by remember { mutableStateOf<Long?>(null) }
@@ -138,13 +139,22 @@ fun WorkbenchScreen(
                     }
                 }
                 .pointerInput(components, wires, connecting) {
-                    detectTapGestures { offset ->
-                        val worldX = (offset.x / density - viewModel.panZoom.value.panX) /
-                            viewModel.panZoom.value.zoom
-                        val worldY = (offset.y / density - viewModel.panZoom.value.panY) /
-                            viewModel.panZoom.value.zoom
-                        handleTap(worldX, worldY, components, wires, viewModel)
-                    }
+                    detectTapGestures(
+                        onTap = { offset ->
+                            val worldX = (offset.x / density - viewModel.panZoom.value.panX) /
+                                viewModel.panZoom.value.zoom
+                            val worldY = (offset.y / density - viewModel.panZoom.value.panY) /
+                                viewModel.panZoom.value.zoom
+                            handleTap(worldX, worldY, components, wires, viewModel)
+                        },
+                        onLongPress = { offset ->
+                            val worldX = (offset.x / density - viewModel.panZoom.value.panX) /
+                                viewModel.panZoom.value.zoom
+                            val worldY = (offset.y / density - viewModel.panZoom.value.panY) /
+                                viewModel.panZoom.value.zoom
+                            handleLongPress(worldX, worldY, components, wires, viewModel)
+                        }
+                    )
                 }
         ) {
             // Rejilla
@@ -227,7 +237,10 @@ fun WorkbenchScreen(
             isRunning = isRunning,
             undoAvailable = undo.isNotEmpty(),
             redoAvailable = redo.isNotEmpty(),
-            onBack = onNavigateUp,
+            onBack = {
+                viewModel.flushSave()
+                onNavigateUp()
+            },
             onUndo = { viewModel.undo() },
             onRedo = { viewModel.redo() },
             onRun = {
@@ -239,7 +252,12 @@ fun WorkbenchScreen(
             onReview = { showDrc = true; viewModel.reviewCircuit() },
             onExport = { showExport = true },
             onNetlist = { showNetlist = !showNetlist },
-            onAi = { viewModel.askAi() }
+            onAi = { viewModel.askAi() },
+            saveLabel = when (saveState) {
+                WorkbenchViewModel.SaveState.SAVING -> "Guardando…"
+                WorkbenchViewModel.SaveState.SAVED -> "Guardado ✓"
+                else -> ""
+            }
         )
 
         // ================= ESTADO / AYUDA =================
@@ -250,6 +268,29 @@ fun WorkbenchScreen(
         ) {
             if (connecting == null && selectedId == null && helpCards.isNotEmpty()) {
                 HelpBanner(helpCards.first())
+            }
+        }
+
+        // ================= ZOOM Y REENCUADRE =================
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ZoomButton("+") {
+                haptic.lightClick()
+                val pz = viewModel.panZoom.value
+                viewModel.updatePanZoom(pz.panX, pz.panY, pz.zoom * 1.25f)
+            }
+            ZoomButton("−") {
+                haptic.lightClick()
+                val pz = viewModel.panZoom.value
+                viewModel.updatePanZoom(pz.panX, pz.panY, pz.zoom / 1.25f)
+            }
+            ZoomButton("⌖") {
+                haptic.lightClick()
+                viewModel.resetPanZoom()
             }
         }
 
@@ -288,6 +329,7 @@ fun WorkbenchScreen(
                         onProperty = { name, value -> viewModel.setProperty(id, name, value) },
                         onLabel = { viewModel.setLabel(id, it) },
                         onDelete = { viewModel.deleteComponent(id) },
+                        onRotate = { viewModel.rotateComponent(id) },
                         onClose = { viewModel.selectComponent(null) }
                     )
                 }
@@ -504,10 +546,32 @@ private fun handleTap(
     viewModel.closeMultimeter()
 }
 
+/**
+ * Mantener pulsado sobre un cable lo elimina (con opción de deshacer).
+ */
+private fun handleLongPress(
+    worldX: Float,
+    worldY: Float,
+    components: List<CircuitComponent>,
+    wires: List<CircuitWire>,
+    viewModel: WorkbenchViewModel
+) {
+    for (wire in wires) {
+        val from = components.find { it.id == wire.fromComponentId } ?: continue
+        val to = components.find { it.id == wire.toComponentId } ?: continue
+        val (ax, ay) = pinWorld(from, wire.fromPinIndex)
+        val (bx, by) = pinWorld(to, wire.toPinIndex)
+        if (distanceToSegment(worldX, worldY, ax, ay, bx, by) < 18f) {
+            viewModel.deleteWire(wire.id)
+            return
+        }
+    }
+}
+
 private fun pinWorld(component: CircuitComponent, pin: Int): Pair<Float, Float> {
     val count = component.type.pinCount
     val step = if (count > 1) 360f / count else 0f
-    val angle = Math.toRadians((pin * step - 90).toDouble())
+    val angle = Math.toRadians((pin * step - 90.0 + component.position.rotation).toDouble())
     val radius = 40f
     return (component.position.x + radius * kotlin.math.cos(angle).toFloat()) to
         (component.position.y + radius * kotlin.math.sin(angle).toFloat())
@@ -678,7 +742,8 @@ private fun ComponentNode(
                         else -> CircuitColors.Outline
                     },
                     CircuitShapes.CardShape
-                ),
+                )
+                .rotate(component.position.rotation),
             contentAlignment = Alignment.Center
         ) {
             if (component.type.category == com.circuitnexus.model.ComponentCategory.DISPLAY) {
@@ -784,7 +849,8 @@ private fun WorkbenchTopBar(
     onReview: () -> Unit,
     onExport: () -> Unit,
     onNetlist: () -> Unit,
-    onAi: () -> Unit
+    onAi: () -> Unit,
+    saveLabel: String = ""
 ) {
     Row(
         modifier = Modifier
@@ -803,12 +869,21 @@ private fun WorkbenchTopBar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                if (isRunning) "● Simulando en vivo" else "● En pausa",
-                color = if (isRunning) CircuitColors.Emerald else CircuitColors.Amber,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.W600
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (isRunning) "● Simulando en vivo" else "● En pausa",
+                    color = if (isRunning) CircuitColors.Emerald else CircuitColors.Amber,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.W600
+                )
+                if (saveLabel.isNotEmpty()) {
+                    Text(
+                        "   $saveLabel",
+                        color = CircuitColors.OnSurfaceVariant,
+                        fontSize = 9.sp
+                    )
+                }
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             IconPill("↶", enabled = undoAvailable) { onUndo() }
@@ -877,6 +952,7 @@ private fun ComponentPropertiesPanel(
     onProperty: (String, Any) -> Unit,
     onLabel: (String) -> Unit,
     onDelete: () -> Unit,
+    onRotate: () -> Unit,
     onClose: () -> Unit
 ) {
     Column(
@@ -910,6 +986,7 @@ private fun ComponentPropertiesPanel(
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                IconPill("↻") { onRotate() }
                 IconPill("🗑") { onDelete() }
                 IconPill("✕") { onClose() }
             }
@@ -1298,7 +1375,8 @@ private fun NetlistOverlay(lines: List<String>, onClose: () -> Unit) {
                 fontSize = 15.sp
             )
             Text(
-                "Así está unido todo, en palabras sencillas:",
+                "Así está unido todo, en palabras sencillas. " +
+                    "Mantén pulsado un cable en la mesa para borrarlo.",
                 color = CircuitColors.OnSurfaceVariant,
                 fontSize = 10.sp
             )
@@ -1570,5 +1648,25 @@ private fun TutorialCardOverlay(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun ZoomButton(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .background(CircuitColors.Surface.copy(alpha = 0.95f), CircleShape)
+            .border(1.dp, CircuitColors.Outline, CircleShape)
+            .pointerInput(label) { detectTapGestures { onClick() } },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            label,
+            color = CircuitColors.OnSurface,
+            fontSize = if (label == "⌖") 15.sp else 19.sp,
+            fontWeight = FontWeight.W700
+        )
     }
 }

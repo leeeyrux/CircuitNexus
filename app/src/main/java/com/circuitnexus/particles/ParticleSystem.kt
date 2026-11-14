@@ -238,7 +238,7 @@ private fun getPinWorldPosition(
     zoom: Float
 ): androidx.compose.ui.geometry.Offset {
     val pinCount = com.circuitnexus.model.CircuitWire.getPinCount(component.type)
-    val angle = if (pinCount > 1) (pinIndex * 360f / pinCount - 90) else 0f
+    val angle = if (pinCount > 1) (pinIndex * 360f / pinCount - 90 + component.position.rotation) else 0f
     val radius = 40f * zoom
     val centerX = component.position.x * zoom + panOffset.x
     val centerY = component.position.y * zoom + panOffset.y

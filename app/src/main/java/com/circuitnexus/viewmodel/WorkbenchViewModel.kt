@@ -11,6 +11,7 @@ import com.circuitnexus.command.DeleteComponentCommand
 import com.circuitnexus.command.DeleteWireCommand
 import com.circuitnexus.command.HistoryManager
 import com.circuitnexus.command.MoveComponentCommand
+import com.circuitnexus.command.RotateComponentCommand
 import com.circuitnexus.command.UpdateComponentLabelCommand
 import com.circuitnexus.command.UpdateComponentPropertyCommand
 import com.circuitnexus.data.CircuitRepository
@@ -91,6 +92,14 @@ class WorkbenchViewModel(
 
     private val _netlistLines = MutableStateFlow<List<String>>(emptyList())
     val netlistLines = _netlistLines.asStateFlow()
+
+    // ===== Guardado automático =====
+    private val _saveState = MutableStateFlow(SaveState.IDLE)
+    val saveState = _saveState.asStateFlow()
+
+    private var persistJob: Job? = null
+
+    enum class SaveState { IDLE, SAVING, SAVED }
 
     // ===== Borradores del panel de piezas =====
     private val _draftResistance = MutableStateFlow(330f)
@@ -241,26 +250,44 @@ class WorkbenchViewModel(
                     val comps = _components.value
                     val wrs = _wires.value
                     if (comps.isNotEmpty()) {
-                        // Reconstruye la matriz solo si cambió el circuito
-                        transientEngine.updateTopology(comps, wrs)
-                        // Pasos baratos sin calcular estado ni historial
-                        repeat(6) {
-                            transientEngine.step(comps, wrs, computeState = false, record = false)
-                        }
-                        // Un paso final completo para la UI y el osciloscopio
-                        val result = transientEngine.step(comps, wrs, computeState = true, record = true)
-                        frame++
-                        // Publicamos a ~30 fps: suficiente para verse fluido y ahorra batería
-                        if (result.success && frame % 2 == 0) {
-                            _simulationState.value = SimulationState(
-                                isRunning = true,
-                                nodeVoltages = result.nodeVoltages,
-                                componentCurrents = result.componentCurrents,
-                                wireCurrents = result.wireCurrents,
-                                warnings = _simulationState.value.warnings,
-                                lastUpdate = System.currentTimeMillis()
+                        try {
+                            // Reconstruye la matriz solo si cambió el circuito
+                            transientEngine.updateTopology(comps, wrs)
+                            // Pasos baratos sin calcular estado ni historial
+                            repeat(6) {
+                                transientEngine.step(comps, wrs, computeState = false, record = false)
+                            }
+                            // Un paso final completo para la UI y el osciloscopio
+                            val result = transientEngine.step(comps, wrs, computeState = true, record = true)
+                            frame++
+                            // Publicamos a ~30 fps: suficiente para verse fluido y ahorra batería
+                            if (result.success && frame % 2 == 0) {
+                                _simulationState.value = SimulationState(
+                                    isRunning = true,
+                                    nodeVoltages = result.nodeVoltages,
+                                    componentCurrents = result.componentCurrents,
+                                    wireCurrents = result.wireCurrents,
+                                    warnings = _simulationState.value.warnings,
+                                    lastUpdate = System.currentTimeMillis()
+                                )
+                                updateChannels()
+                            }
+                        } catch (t: Throwable) {
+                            // Un circuito raro nunca debe tumbar la app:
+                            // pausamos la simulación y avisamos con lenguaje simple.
+                            _isRunning.value = false
+                            _drcReport.value = DrcEngine.DrcReport(
+                                issues = listOf(
+                                    DrcEngine.DrcIssue(
+                                        severity = WarningSeverity.INFO,
+                                        title = "Cálculo detenido",
+                                        message = "La simulación se detuvo porque el circuito es muy complejo o tiene una conexión rara.",
+                                        suggestion = "Revisa las conexiones y vuelve a darle a Reproducir."
+                                    )
+                                ),
+                                score = 50,
+                                summary = "Simulación en pausa por seguridad."
                             )
-                            updateChannels()
                         }
                     }
                 }
@@ -437,11 +464,54 @@ class WorkbenchViewModel(
 
     private fun onTopologyChanged() {
         rebuildNetlist()
-        // La simulación detecta el cambio sola (topologyKey). Forzamos revisión breve.
+        schedulePersist()
+        // La simulación detecta el cambio sola (hash de topología).
         viewModelScope.launch {
             delay(120)
             runQuickReview()
         }
+    }
+
+    /** Guardado con pequeño retardo para no escribir en disco en cada gesto. */
+    private fun schedulePersist() {
+        persistJob?.cancel()
+        _saveState.value = SaveState.SAVING
+        persistJob = viewModelScope.launch {
+            delay(600)
+            val comps = _components.value
+            val wrs = _wires.value
+            repository.replaceCircuitContents(circuitId, comps, wrs)
+            _circuit.value?.let {
+                repository.saveCircuit(it.copy(updatedAt = System.currentTimeMillis()))
+            }
+            _saveState.value = SaveState.SAVED
+        }
+    }
+
+    /** Fuerza el guardado inmediato (al salir de la pantalla). */
+    fun flushSave() {
+        persistJob?.cancel()
+        viewModelScope.launch {
+            repository.replaceCircuitContents(circuitId, _components.value, _wires.value)
+            _circuit.value?.let {
+                repository.saveCircuit(it.copy(updatedAt = System.currentTimeMillis()))
+            }
+            _saveState.value = SaveState.SAVED
+        }
+    }
+
+    /** Gira la pieza 90° (útil para ordenar el circuito). */
+    fun rotateComponent(componentId: Long) {
+        val comp = _components.value.find { it.id == componentId } ?: return
+        val oldRotation = comp.position.rotation
+        val newRotation = (oldRotation + 90f) % 360f
+        historyManager.executeCommand(
+            RotateComponentCommand(
+                this, componentId, oldRotation, newRotation,
+                comp.position.x, comp.position.y
+            )
+        )
+        hapticManager?.mediumClick()
     }
 
     // ===== Acciones de usuario =====
@@ -633,11 +703,13 @@ class WorkbenchViewModel(
 
     fun undo() {
         historyManager.undo()
+        schedulePersist()
         hapticManager?.lightClick()
     }
 
     fun redo() {
         historyManager.redo()
+        schedulePersist()
         hapticManager?.lightClick()
     }
 
@@ -885,6 +957,11 @@ class WorkbenchViewModel(
 
     override fun onCleared() {
         simulationJob?.cancel()
+        persistJob?.cancel()
+        // Guardado final best-effort al cerrar la pantalla
+        container.coroutineScope.launch {
+            repository.replaceCircuitContents(circuitId, _components.value, _wires.value)
+        }
         super.onCleared()
     }
 }

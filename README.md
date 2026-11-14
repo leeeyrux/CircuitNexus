@@ -37,6 +37,11 @@ los ve encenderse de verdad, y entiende el porqué en palabras de todos los día
 - **Plantillas** de circuitos famosos desde el mismo panel
 - Panel de propiedades al tocar una pieza (voltaje, resistencia, frecuencia, texto de pantalla…)
 - **Deshacer / Rehacer** de 50 acciones
+- **Girar piezas** 90° con el botón ↻ (los pines y los cables giran con ella)
+- **Mantén pulsado un cable** para borrarlo (con opción de deshacer)
+- **Autoguardado** con indicador "Guardado ✓" y guardado al salir
+- **Zoom con botones** (+ / − / ⌖ reencuadrar) además del gesto de pellizcar
+- Navegación que recuerda la pestaña donde estabas
 
 ### 📈 Osciloscopio
 - 2–4 canales de colores
