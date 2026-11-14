@@ -563,7 +563,7 @@ private fun PartCapsule(
         }
         Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
             Text(
-                type.displayName,
+                friendlyLabel(type),
                 color = CircuitColors.OnSurface,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.W700,
@@ -675,6 +675,12 @@ private fun categoryColor(category: ComponentCategory): Color = when (category) 
     ComponentCategory.DISPLAY -> CircuitColors.Emerald
     ComponentCategory.CONNECTOR -> CircuitColors.OnSurfaceVariant
     ComponentCategory.WIRE -> CircuitColors.Emerald
+}
+
+private fun friendlyLabel(type: ComponentType): String = when (type) {
+    ComponentType.TIMER_555 -> "Cerebro de Pulsos"
+    ComponentType.SWITCH -> "Botón Interruptor"
+    else -> type.displayName
 }
 
 private fun colorLabel(key: String): String = when (key) {
