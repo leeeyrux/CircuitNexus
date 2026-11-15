@@ -53,6 +53,23 @@ data class ComponentProperties(
     val displayDigits: Int? = null,             // 4, 8 o 10 dígitos
     val brightness: Float? = null,              // 0..1
     val pwmDuty: Float? = null,                 // 0..1 control de brillo/velocidad
+    val cursorPosition: Int? = null,            // Posición del cursor en LCD editable
+
+    // Servo
+    val servoAngle: Float? = null,              // Ángulo del servo 0-180°
+    val pwmDuty: Float? = null,                 // 0..1 control de brillo/velocidad
+
+    // Scratch avanzado
+    val variableName: String? = null,           // Nombre de variable
+    val variableValue: Double? = null,          // Valor de variable
+    val listValues: List<Double>? = null,       // Valores de lista
+    val functionName: String? = null,           // Nombre de función
+    val functionParams: List<String>? = null,   // Parámetros de función
+    val sensorType: String? = null,             // Tipo de sensor
+    val mathOperation: String? = null,          // "add", "sub", "mul", "div", "pow", "sqrt"
+    val logicOperation: String? = null,         // "and", "or", "not", "eq", "lt", "gt"
+    val listOperation: String? = null,          // "append", "remove", "get", "length"
+    val delayMs: Long? = null,                  // Milisegundos de espera
 
     // Sensores (valor simulado que el usuario puede mover)
     val sensorValue: Float? = null              // Valor del sensor (0..1)
@@ -158,7 +175,7 @@ data class CircuitComponent(
             ComponentType.RELAY -> ComponentProperties(isNormallyOpen = true, coilResistance = 400f)
             ComponentType.TRANSISTOR_SWITCH -> ComponentProperties(thresholdVoltage = 2.0f, currentGain = 1f)
 
-            // Scratch blocks
+            // Scratch blocks básicos
             ComponentType.SCRATCH_EVENT -> ComponentProperties()
             ComponentType.SCRATCH_LOOP -> ComponentProperties()
             ComponentType.SCRATCH_IF -> ComponentProperties()
@@ -167,15 +184,23 @@ data class CircuitComponent(
             ComponentType.SCRATCH_READ_PIN -> ComponentProperties()
             ComponentType.SCRATCH_MATH -> ComponentProperties()
 
-            // Pantallas BCD y editable
+            // Scratch avanzado
+            ComponentType.SCRATCH_VARIABLE -> ComponentProperties(variableName = "var", variableValue = 0.0)
+            ComponentType.SCRATCH_LIST -> ComponentProperties(listValues = listOf())
+            ComponentType.SCRATCH_FUNCTION -> ComponentProperties(functionName = "func", functionParams = listOf())
+            ComponentType.SCRATCH_SENSOR -> ComponentProperties(sensorType = "temperature")
+            ComponentType.SCRATCH_MATH_ADV -> ComponentProperties(mathOperation = "add")
+            ComponentType.SCRATCH_LOGIC -> ComponentProperties(logicOperation = "and")
+            ComponentType.SCRATCH_LIST_OP -> ComponentProperties(listOperation = "append")
+            ComponentType.SCRATCH_DELAY -> ComponentProperties(delayMs = 1000)
+            componentType.SCRATCH_REPEAT_UNTIL -> ComponentProperties()
+
+            // ===== NUEVOS COMPONENTES v1.3 =====
+            // LCD 16x2 Editable
+            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f, cursorPosition = 0)
+
+            // 7 Segmentos BCD
             ComponentType.DISPLAY_7SEG_BCD -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
-            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f)
-            ComponentType.DISPLAY_7SEG_4 -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
-            ComponentType.DISPLAY_7SEG_8 -> ComponentProperties(displayDigits = 8, text = "00000000", brightness = 1f)
-            ComponentType.DISPLAY_7SEG_10 -> ComponentProperties(displayDigits = 10, text = "0000000000", brightness = 1f)
-            ComponentType.LCD_16X2 -> ComponentProperties(text = "CircuitNexus", brightness = 1f)
-            ComponentType.OLED_SSD1306 -> ComponentProperties(text = "Hola!", brightness = 1f)
-            ComponentType.LED_STRIP_WS2812 -> ComponentProperties(ledColor = "rainbow", brightness = 0.8f, resistanceOhms = 330f)
 
             // Conectores
             else -> ComponentProperties()

@@ -407,6 +407,16 @@ class TransientEngine {
                     val coil = (c.properties.coilResistance ?: 400.0).toDouble().coerceAtLeast(1.0)
                     stampResistor(gLinear, a, b, 1.0 / coil)
                 }
+                ComponentType.LCD_16X2_EDITABLE -> {
+                    // LCD editable: modelo como capacitor con resistencia de fuga
+                    val c = (c.properties.capacitanceFarads ?: 100e-6).toDouble().coerceAtLeast(1e-15)
+                    stampResistor(gLinear, a, b, c / timeStep)
+                }
+                ComponentType.DISPLAY_7SEG_BCD -> {
+                    // Display 7 segmentos BCD: modelo como resistor de carga
+                    val r = (c.properties.resistanceOhms ?: 330.0).toDouble().coerceAtLeast(1.0)
+                    stampResistor(gLinear, a, b, 1.0 / r)
+                }
                 ComponentType.SERVO -> {
                     // Servo: modelo PWM - posición según duty cycle
                     val angle = (c.properties.servoAngle ?: 90f).toDouble()

@@ -14,6 +14,7 @@ enum class ComponentCategory(val title: String, val icon: String) {
     DISPLAY("Pantallas y luces", "🖥️"),
     CONNECTOR("Conectores", "🔌"),
     SCRATCH("Bloques Scratch", "🧩"),
+    INPUT("Entrada de datos", "⌨️"),
     WIRE("Cable", "🔗")
 }
 
@@ -127,6 +128,21 @@ enum class ComponentType(
     SCRATCH_SET_PIN("Activar Pin", "📌", "Enciende/apaga un pin digital", ComponentCategory.IC, 2),
     SCRATCH_READ_PIN("Leer Pin", "📖", "Lee el estado de un pin", ComponentCategory.IC, 2),
     SCRATCH_MATH("Operación Matemática", "➕", "Suma, resta, multiplica, divide", ComponentCategory.IC, 3),
+
+    // ===== ENTRADA DE DATOS =====
+    LCD_16X2_EDITABLE("Pantalla de texto editable", "📝", "Escribe texto en la pantalla táctil con teclado virtual", ComponentCategory.INPUT, 16),
+    DISPLAY_7SEG_BCD("Display 7 seg BCD", "🔢", "Muestra números con decodificador BCD real", ComponentCategory.DISPLAY, 8),
+
+    // ===== SCRATCH AVANZADO =====
+    SCRATCH_VARIABLE("Variable", "📦", "Guarda y usa valores numéricos", ComponentCategory.SCRATCH, 1),
+    SCRATCH_LIST("Lista", "📋", "Guarda múltiples valores en una lista", ComponentCategory.SCRATCH, 1),
+    SCRATCH_FUNCTION("Función", "🔧", "Crea bloques reutilizables con parámetros", ComponentCategory.SCRATCH, 1),
+    SCRATCH_SENSOR("Leer Sensor", "📡", "Lee valor de sensor conectado", ComponentCategory.SCRATCH, 2),
+    SCRATCH_MATH_ADV("Matemáticas Avanzadas", "🧮", "Operaciones: + - × ÷ potencia raíz", ComponentCategory.SCRATCH, 3),
+    SCRATCH_LOGIC("Lógica", "🔀", "Y, O, NO, comparaciones", ComponentCategory.SCRATCH, 3),
+    SCRATCH_LIST_OP("Operación Lista", "📋", "Añadir, quitar, buscar en lista", ComponentCategory.SCRATCH, 1),
+    SCRATCH_DELAY("Esperar (ms)", "⏱️", "Pausa el programa milisegundos", ComponentCategory.SCRATCH, 1),
+    SCRATCH_REPEAT_UNTIL("Repetir hasta", "🔁", "Repite hasta que se cumpla condición", ComponentCategory.SCRATCH, 1),
 
     // ===== ESPECIAL =====
     WIRE("Cable", "🔗", "Une dos puntos para que fluya la energía", ComponentCategory.WIRE, 2);

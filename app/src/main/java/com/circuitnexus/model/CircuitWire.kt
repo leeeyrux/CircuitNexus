@@ -139,6 +139,17 @@ data class CircuitWire(
             )
             ComponentType.DISPLAY_7SEG_BCD -> listOf("A", "B", "C", "D", "E", "F", "G", "Punto")
             ComponentType.WIRE -> listOf("Punto 1", "Punto 2")
+            // ===== SCRATCH AVANZADO =====
+            ComponentType.SCRATCH_VARIABLE -> listOf("Valor")
+            ComponentType.SCRATCH_LIST -> listOf("Elemento")
+            ComponentType.SCRATCH_FUNCTION -> listOf("Parámetro", "Resultado")
+            ComponentType.SCRATCH_SENSOR -> listOf("Pin Sensor")
+            ComponentType.SCRATCH_MATH_ADV -> listOf("Operando A", "Operando B", "Resultado")
+            ComponentType.SCRATCH_LOGIC -> listOf("Entrada A", "Entrada B", "Salida")
+            ComponentType.SCRATCH_LIST_OP -> listOf("Lista", "Índice/Valor")
+            ComponentType.SCRATCH_DELAY -> listOf("Trigger")
+            ComponentType.SCRATCH_REPEAT_UNTIL -> listOf("Condición", "Cuerpo")
+            ComponentType.WIRE -> listOf("Punto 1", "Punto 2")
         }
 
         /** Descripciones cortas de cada pin para el tutorial y ayudas */

@@ -191,9 +191,9 @@ fun LessonCard(
                 }
                 Column {
                     Text(
-                        text = if (completed) "Completada ✓" : "Pendiente",
+                        text = (if (completed) "Completada ✓" else "Pendiente"),
                         style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                        color = if (completed) CircuitColors.Emerald else CircuitColors.OnSurfaceVariant
+                        color = (if (completed) CircuitColors.Emerald else CircuitColors.OnSurfaceVariant)
                     )
                 }
             }
