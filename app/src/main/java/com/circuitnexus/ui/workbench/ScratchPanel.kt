@@ -73,7 +73,7 @@ fun ScratchPanel(
                         Text("✕", color = CircuitColors.OnSurfaceVariant, fontSize = 16.sp)
                     }
                 }
-            )
+            }
 
             // Paleta de bloques
             Text("Arrastra bloques al área de trabajo", color = CircuitColors.OnSurfaceVariant, fontSize = 9.sp, modifier = Modifier.padding(start = 8.dp))
@@ -154,8 +154,7 @@ fun ScratchBlockChip(block: ScratchBlockInfo, onDragStart: (ScratchEngine.BlockT
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(block.label, color = block.color, fontSize = 9.sp, fontWeight = FontWeight.W600, textAlign = TextAlign.Center, maxLines = 2
+        Text(block.label, color = block.color, fontSize = 9.sp, fontWeight = FontWeight.W600, textAlign = TextAlign.Center, maxLines = 2)
     }
 }
 
-}
