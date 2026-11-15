@@ -71,6 +71,25 @@ enum class ComponentType(
     COUNTER_IC("Contador", "🔢", "Cuenta pulsos automáticamente", ComponentCategory.IC, 8),
     SHIFT_REGISTER("Desplazador de luces", "💫", "Enciende muchas salidas en secuencia", ComponentCategory.IC, 8),
 
+    // ===== 74HC LÓGICA =====
+    LOGIC_AND("Compuerta Y (AND)", "🔀➕", "Solo pasa energía si AMBAS entradas tienen energía", ComponentCategory.IC, 3),
+    LOGIC_OR("Compuerta O (OR)", "🔀➖", "Pasa energía si CUALQUIERA entrada tiene energía", ComponentCategory.IC, 3),
+    LOGIC_NOT("Inversor (NOT)", "🔄", "Invierte la señal: energía → nada, nada → energía", ComponentCategory.IC, 2),
+    LOGIC_NAND("Compuerta NO-Y (NAND)", "🚫➕", "Lo contrario de AND: solo bloquea si AMBAS tienen energía", ComponentCategory.IC, 3),
+    LOGIC_NOR("Compuerta NO-O (NOR)", "🚫➖", "Lo contrario de OR: solo pasa si NINGUNA tiene energía", ComponentCategory.IC, 3),
+    LOGIC_XOR("Compuerta O-EXCLUSIVO (XOR)", "⚡➕", "Pasa energía si SOLO UNA entrada la tiene", ComponentCategory.IC, 3),
+
+    // ===== SALIDAS AVANZADAS =====
+    SERVO("Servomotor", "🦾", "Gira a un ángulo exacto que le pidas (0-180°)", ComponentCategory.OUTPUT, 3),
+    RELAY("Relé", "🔁🔘", "Interruptor movido por electroimán: aisla y controla potencia", ComponentCategory.CONTROL, 4),
+    TRANSISTOR_SWITCH("Transistor interruptor", "🔺🔘", "Controla mucha energía con poca señal", ComponentCategory.CONTROL, 3),
+
+    // ===== PANTALLAS CON VALORES REALES =====
+    DISPLAY_7SEG_4("Pantalla de números (4)", "🔢", "Muestra 4 números como un reloj", ComponentCategory.DISPLAY, 8),
+    DISPLAY_7SEG_8("Pantalla de números (8)", "🔢", "Muestra 8 números en fila", ComponentCategory.DISPLAY, 8),
+    DISPLAY_7SEG_10("Pantalla de números (10)", "🔟", "Muestra 10 números en fila", ComponentCategory.DISPLAY, 10),
+    LCD_16X2("Pantalla de texto", "📃", "Muestra 2 líneas de texto editable", ComponentCategory.DISPLAY, 16),
+
     // ===== SALIDAS =====
     MOTOR_DC("Motor de corriente continua", "⚙️🌀", "Gira cuando le llega energía", ComponentCategory.OUTPUT, 2),
     SERVO("Servomotor", "🦾", "Gira a un ángulo exacto que le pidas", ComponentCategory.OUTPUT, 3),

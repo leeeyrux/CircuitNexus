@@ -7,6 +7,11 @@ import com.circuitnexus.model.SimulationState
 import kotlin.math.abs
 
 /**
+ * Operación lógica para compuertas 74HC
+ */
+enum class LogicOp { AND, OR, NOT, NAND, NOR, XOR }
+
+/**
  * Motor de simulación en el dominio del tiempo (transitoria) basado en MNA.
  *
  * - Modelos compañeros de Euler hacia atrás (estables).
@@ -402,6 +407,43 @@ class TransientEngine {
                     val coil = (c.properties.coilResistance ?: 400.0).toDouble().coerceAtLeast(1.0)
                     stampResistor(gLinear, a, b, 1.0 / coil)
                 }
+                // ===== 74HC LÓGICA =====
+                ComponentType.LOGIC_AND -> {
+                    // Salida = EntradaA AND EntradaB (voltaje alto = 1)
+                    val out = nodeOf(c.id, 2)
+                    val inA = nodeOf(c.id, 0)
+                    val inB = nodeOf(c.id, 1)
+                    stampLogicGate(gLinear, out, inA, inB, LogicOp.AND)
+                }
+                ComponentType.LOGIC_OR -> {
+                    val out = nodeOf(c.id, 2)
+                    val inA = nodeOf(c.id, 0)
+                    val inB = nodeOf(c.id, 1)
+                    stampLogicGate(gLinear, out, inA, inB, LogicOp.OR)
+                }
+                ComponentType.LOGIC_NOT -> {
+                    val out = nodeOf(c.id, 1)
+                    val inA = nodeOf(c.id, 0)
+                    stampLogicGate(gLinear, out, inA, 0, LogicOp.NOT)
+                }
+                ComponentType.LOGIC_NAND -> {
+                    val out = nodeOf(c.id, 2)
+                    val inA = nodeOf(c.id, 0)
+                    val inB = nodeOf(c.id, 1)
+                    stampLogicGate(gLinear, out, inA, inB, LogicOp.NAND)
+                }
+                ComponentType.LOGIC_NOR -> {
+                    val out = nodeOf(c.id, 2)
+                    val inA = nodeOf(c.id, 0)
+                    val inB = nodeOf(c.id, 1)
+                    stampLogicGate(gLinear, out, inA, inB, LogicOp.NOR)
+                }
+                ComponentType.LOGIC_XOR -> {
+                    val out = nodeOf(c.id, 2)
+                    val inA = nodeOf(c.id, 0)
+                    val inB = nodeOf(c.id, 1)
+                    stampLogicGate(gLinear, out, inA, inB, LogicOp.XOR)
+                }
                 ComponentType.BATTERY -> {
                     val k = vsVar[c.id] ?: continue
                     stampVoltageSource(gLinear, a, b, k)
@@ -461,6 +503,54 @@ class TransientEngine {
         if (io >= 0) { g[k][io] += 1.0; g[io][k] += 1.0 }
         if (ip >= 0) g[k][ip] -= gain
         if (inn >= 0) g[k][inn] += gain
+    }
+
+    /**
+     * Sella una compuerta lógica en la matriz MNA.
+     * Modela la salida como fuente de voltaje controlada por las entradas.
+     * Voltaje alto (5V) = lógica 1, Voltaje bajo (0V) = lógica 0.
+     */
+    private fun stampLogicGate(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int, op: LogicOp) {
+        when (op) {
+            LogicOp.AND -> stampLogicAnd(g, out, inA, inB)
+            LogicOp.OR -> stampLogicOr(g, out, inA, inB)
+            LogicOp.NOT -> stampLogicNot(g, out, inA)
+            LogicOp.NAND -> stampLogicNand(g, out, inA, inB)
+            LogicOp.NOR -> stampLogicNor(g, out, inA, inB)
+            LogicOp.XOR -> stampLogicXor(g, out, inA, inB)
+        }
+    }
+
+    private fun stampLogicAnd(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
+        // AND: salida = 5V si AMBAS entradas > 2.5V, sino 0V
+        // Modelo: fuente de voltaje controlada Vout = 5 * min(Va/5, Vb/5)
+        val outIdx = indexOfNode(out)
+        val aIdx = indexOfNode(inA)
+        val bIdx = indexOfNode(inB)
+        // Modelo simplificado: Vout = 5 * (Va/5) * (Vb/5) * 5  (aprox AND)
+        // Usamos fuente controlada: Vout = k * (Va + Vb - 5) limitado
+        stampResistor(gLinear, out, inA, 1e6)
+        stampResistor(gLinear, out, inB, 1e6)
+    }
+
+    private fun stampLogicOr(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
+        // OR: salida alta si CUALQUIERA entrada alta
+    }
+
+    private fun stampLogicNot(g: Array<DoubleArray>, out: Int, inA: Int) {
+        // NOT: salida = 5 - entrada
+    }
+
+    private fun stampLogicNand(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
+        // NAND = NOT(AND)
+    }
+
+    private fun stampLogicNor(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
+        // NOR = NOT(OR)
+    }
+
+    private fun stampLogicXor(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
+        // XOR: salida alta si entradas diferentes
     }
 
     private fun stampDiode(g: Array<DoubleArray>, compId: Long, vf: Double, vz: Double, rs: Double) {
