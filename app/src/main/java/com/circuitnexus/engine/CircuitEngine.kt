@@ -312,9 +312,9 @@ class CircuitEngine {
             var maxRow = col
             var maxVal = kotlin.math.abs(A[col][col])
             for (row in col + 1 until n) {
-                val val = kotlin.math.abs(A[row][col])
-                if (val > maxVal) {
-                    maxVal = val
+                val absVal = kotlin.math.abs(A[row][col])
+                if (absVal > maxVal) {
+                    maxVal = absVal
                     maxRow = row
                 }
             }
