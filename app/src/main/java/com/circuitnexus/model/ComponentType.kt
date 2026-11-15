@@ -81,20 +81,9 @@ enum class ComponentType(
     LOGIC_NOR("Compuerta NO-O (NOR)", "🚫➖", "Lo contrario de OR: solo pasa si NINGUNA tiene energía", ComponentCategory.IC, 3),
     LOGIC_XOR("Compuerta O-EXCLUSIVO (XOR)", "⚡➕", "Pasa energía si SOLO UNA entrada la tiene", ComponentCategory.IC, 3),
 
-    // ===== SALIDAS AVANZADAS =====
-    SERVO("Servomotor", "🦾", "Gira a un ángulo exacto que le pidas (0-180°)", ComponentCategory.OUTPUT, 3),
-    RELAY("Relé", "🔁🔘", "Interruptor movido por electroimán: aisla y controla potencia", ComponentCategory.CONTROL, 4),
-    TRANSISTOR_SWITCH("Transistor interruptor", "🔺🔘", "Controla mucha energía con poca señal", ComponentCategory.CONTROL, 3),
-
-    // ===== PANTALLAS CON VALORES REALES =====
-    DISPLAY_7SEG_4("Pantalla de números (4)", "🔢", "Muestra 4 números como un reloj", ComponentCategory.DISPLAY, 8),
-    DISPLAY_7SEG_8("Pantalla de números (8)", "🔢", "Muestra 8 números en fila", ComponentCategory.DISPLAY, 8),
-    DISPLAY_7SEG_10("Pantalla de números (10)", "🔟", "Muestra 10 números en fila", ComponentCategory.DISPLAY, 10),
-    LCD_16X2("Pantalla de texto", "📃", "Muestra 2 líneas de texto editable", ComponentCategory.DISPLAY, 16),
-
     // ===== SALIDAS =====
     MOTOR_DC("Motor de corriente continua", "⚙️🌀", "Gira cuando le llega energía", ComponentCategory.OUTPUT, 2),
-    SERVO("Servomotor", "🦾", "Gira a un ángulo exacto que le pidas", ComponentCategory.OUTPUT, 3),
+    SERVO("Servomotor", "🦾", "Gira a un ángulo exacto que le pidas (0-180°)", ComponentCategory.OUTPUT, 3),
     STEPPER("Motor paso a paso", "🎯🌀", "Gira en pasos pequeños y precisos", ComponentCategory.OUTPUT, 4),
     BUZZER("Zumbador", "🔔", "Hace sonido cuando recibe energía", ComponentCategory.OUTPUT, 2),
     SOLENOID("Electroimán", "🧲", "Empuja o tira cuando recibe energía", ComponentCategory.OUTPUT, 2),
@@ -130,10 +119,6 @@ enum class ComponentType(
     SCRATCH_MATH("Operación Matemática", "➕", "Suma, resta, multiplica, divide", ComponentCategory.IC, 3),
 
     // ===== ENTRADA DE DATOS =====
-    LCD_16X2_EDITABLE("Pantalla de texto editable", "📝", "Escribe texto en la pantalla táctil con teclado virtual", ComponentCategory.INPUT, 16),
-    DISPLAY_7SEG_BCD("Display 7 seg BCD", "🔢", "Muestra números con decodificador BCD real", ComponentCategory.DISPLAY, 8),
-
-    // ===== SCRATCH AVANZADO =====
     SCRATCH_VARIABLE("Variable", "📦", "Guarda y usa valores numéricos", ComponentCategory.SCRATCH, 1),
     SCRATCH_LIST("Lista", "📋", "Guarda múltiples valores en una lista", ComponentCategory.SCRATCH, 1),
     SCRATCH_FUNCTION("Función", "🔧", "Crea bloques reutilizables con parámetros", ComponentCategory.SCRATCH, 1),

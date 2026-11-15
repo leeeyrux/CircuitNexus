@@ -22,10 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.circuitnexus.model.ComponentCategory
 import com.circuitnexus.ui.common.CircuitCard
 import com.circuitnexus.ui.common.CircuitTopAppBar
 import com.circuitnexus.ui.theme.CircuitColors
-import com.circuitnexus.ui.theme.CircuitShapes
 import com.circuitnexus.viewmodel.PartsViewModel
 
 /**
@@ -33,12 +33,21 @@ import com.circuitnexus.viewmodel.PartsViewModel
  */
 @Composable
 fun PartsScreen(viewModel: PartsViewModel) {
-    val categories = listOf(
-        viewModel.allParts.filter { it.category == PartsViewModel.PartCategory.POWER } to PartsViewModel.PartCategory.POWER,
-        viewModel.allParts.filter { it.category == PartsViewModel.PartCategory.CONTROL } to PartsViewModel.PartCategory.CONTROL,
-        viewModel.allParts.filter { it.category == PartsViewModel.PartCategory.OUTPUT } to PartsViewModel.PartCategory.OUTPUT,
-        viewModel.allParts.filter { it.category == PartsViewModel.PartCategory.TIMING } to PartsViewModel.PartCategory.TIMING
+    // Orden de categorías para mostrar
+    val categoryOrder = listOf(
+        ComponentCategory.POWER,
+        ComponentCategory.CONTROL,
+        ComponentCategory.OUTPUT,
+        ComponentCategory.TIMING, // No existe en ComponentCategory, usar PASSIVE o SEMICONDUCTOR
+        ComponentCategory.SEMICONDUCTOR,
+        ComponentCategory.IC,
+        ComponentCategory.SENSOR,
+        ComponentCategory.DISPLAY,
+        ComponentCategory.CONNECTOR,
+        ComponentCategory.SCRATCH
     )
+
+    val validCategories = categoryOrder.filter { viewModel.partsByCategory.containsKey(it) }
 
     Column(modifier = Modifier.fillMaxSize().background(CircuitColors.Background)) {
         CircuitTopAppBar(
@@ -51,7 +60,8 @@ fun PartsScreen(viewModel: PartsViewModel) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(top = 4.dp, bottom = 130.dp)
         ) {
-            categories.forEach { (parts, category) ->
+            validCategories.forEach { category ->
+                val parts = viewModel.partsByCategory[category] ?: emptyList()
                 if (parts.isEmpty()) return@forEach
                 item(key = "header-${category.name}") {
                     Row(

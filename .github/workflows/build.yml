@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
 
       - name: Aceptar licencias Android SDK
-        run: yes | sdkmanager --licenses
+        run: yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Configurar Gradle (sin caché de solo lectura)
         uses: gradle/actions/setup-gradle@v3

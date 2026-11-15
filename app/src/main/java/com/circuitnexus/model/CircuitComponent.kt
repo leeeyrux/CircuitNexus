@@ -57,7 +57,6 @@ data class ComponentProperties(
 
     // Servo
     val servoAngle: Float? = null,              // Ángulo del servo 0-180°
-    val pwmDuty: Float? = null,                 // 0..1 control de brillo/velocidad
 
     // Scratch avanzado
     val variableName: String? = null,           // Nombre de variable
@@ -142,7 +141,7 @@ data class CircuitComponent(
 
             // Salidas
             ComponentType.MOTOR_DC -> ComponentProperties(resistanceOhms = 12f, pwmDuty = 1f)
-            ComponentType.SERVO -> ComponentProperties(pwmDuty = 0.5f)
+            ComponentType.SERVO -> ComponentProperties(pwmDuty = 0.5f, servoAngle = 90f)
             ComponentType.STEPPER -> ComponentProperties(frequencyHz = 10f)
             ComponentType.BUZZER -> ComponentProperties(frequencyHz = 440f, voltageVolts = 5f)
             ComponentType.SOLENOID -> ComponentProperties(resistanceOhms = 40f)
@@ -157,7 +156,7 @@ data class CircuitComponent(
             ComponentType.DISPLAY_7SEG_8 -> ComponentProperties(displayDigits = 8, text = "00000000", brightness = 1f)
             ComponentType.DISPLAY_7SEG_10 -> ComponentProperties(displayDigits = 10, text = "0000000000", brightness = 1f)
             ComponentType.LCD_16X2 -> ComponentProperties(text = "CircuitNexus", brightness = 1f)
-            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f)
+            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f, cursorPosition = 0)
             ComponentType.DISPLAY_7SEG_BCD -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
             ComponentType.OLED_SSD1306 -> ComponentProperties(text = "Hola!", brightness = 1f)
             ComponentType.LED_STRIP_WS2812 -> ComponentProperties(ledColor = "rainbow", brightness = 0.8f, resistanceOhms = 330f)
@@ -171,8 +170,6 @@ data class CircuitComponent(
             ComponentType.LOGIC_XOR -> ComponentProperties(logicFunction = "XOR")
 
             // Salidas avanzadas
-            ComponentType.SERVO -> ComponentProperties(pwmDuty = 0.5f, servoAngle = 90f)
-            ComponentType.RELAY -> ComponentProperties(isNormallyOpen = true, coilResistance = 400f)
             ComponentType.TRANSISTOR_SWITCH -> ComponentProperties(thresholdVoltage = 2.0f, currentGain = 1f)
 
             // Scratch blocks básicos
@@ -193,14 +190,7 @@ data class CircuitComponent(
             ComponentType.SCRATCH_LOGIC -> ComponentProperties(logicOperation = "and")
             ComponentType.SCRATCH_LIST_OP -> ComponentProperties(listOperation = "append")
             ComponentType.SCRATCH_DELAY -> ComponentProperties(delayMs = 1000)
-            componentType.SCRATCH_REPEAT_UNTIL -> ComponentProperties()
-
-            // ===== NUEVOS COMPONENTES v1.3 =====
-            // LCD 16x2 Editable
-            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f, cursorPosition = 0)
-
-            // 7 Segmentos BCD
-            ComponentType.DISPLAY_7SEG_BCD -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
+            ComponentType.SCRATCH_REPEAT_UNTIL -> ComponentProperties()
 
             // Conectores
             else -> ComponentProperties()
