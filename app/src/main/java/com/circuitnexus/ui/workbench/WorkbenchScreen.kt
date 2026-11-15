@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.circuitnexus.engine.HelpCard
 import com.circuitnexus.engine.HelpType
+import com.circuitnexus.engine.ScratchEngine
 import com.circuitnexus.model.CircuitComponent
 import com.circuitnexus.model.CircuitWire
 import com.circuitnexus.model.ComponentType
@@ -63,6 +64,7 @@ import com.circuitnexus.templates.CircuitTemplate
 import com.circuitnexus.templates.CircuitTemplates
 import com.circuitnexus.ui.library.LibraryScreen
 import com.circuitnexus.ui.multimeter.ProMultimeter
+import com.circuitnexus.ui.workbench.ScratchPanel
 import com.circuitnexus.ui.oscilloscope.OscilloscopeScreen
 import com.circuitnexus.ui.theme.CircuitColors
 import com.circuitnexus.util.HapticFeedback
@@ -102,6 +104,8 @@ fun WorkbenchScreen(
     val redo by viewModel.redoStack.collectAsStateWithLifecycle()
     val showScope by viewModel.showOscilloscope.collectAsStateWithLifecycle()
     val showLibrary by viewModel.showLibrary.collectAsStateWithLifecycle()
+    val showScratch by viewModel.showScratch.collectAsStateWithLifecycle()
+    val scratchEngine by viewModel.scratchEngine.collectAsStateWithLifecycle()
     val isRunning by viewModel.isRunning.collectAsStateWithLifecycle()
     val tutorialStep by viewModel.tutorialStep.collectAsStateWithLifecycle()
     val tutorialProgress by viewModel.tutorialProgress.collectAsStateWithLifecycle()
@@ -119,6 +123,7 @@ fun WorkbenchScreen(
     var showExport by remember { mutableStateOf(false) }
     var showNetlist by remember { mutableStateOf(false) }
     var showPartsSheet by remember { mutableStateOf(false) }
+    var showScratch by remember { mutableStateOf(false) }
     var canvasSizePx by remember { mutableStateOf(IntSize.Zero) }
     val haptic = HapticFeedback.rememberHaptic()
 
@@ -252,6 +257,7 @@ fun WorkbenchScreen(
             onReview = { showDrc = true; viewModel.reviewCircuit() },
             onExport = { showExport = true },
             onNetlist = { showNetlist = !showNetlist },
+            onScratch = { viewModel.toggleScratch() },
             onAi = { viewModel.askAi() },
             saveLabel = when (saveState) {
                 WorkbenchViewModel.SaveState.SAVING -> "Guardando…"
@@ -431,6 +437,15 @@ fun WorkbenchScreen(
                     viewModel.toggleLibrary()
                 },
                 onDismiss = { showPartsSheet = false }
+            )
+        }
+
+        // ================= SCRATCH PANEL =================
+        if (showScratch) {
+            ScratchPanel(
+                engine = scratchEngine,
+                onClose = { viewModel.showScratch = false },
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -849,6 +864,7 @@ private fun WorkbenchTopBar(
     onReview: () -> Unit,
     onExport: () -> Unit,
     onNetlist: () -> Unit,
+    onScratch: () -> Unit,
     onAi: () -> Unit,
     saveLabel: String = ""
 ) {
@@ -906,6 +922,7 @@ private fun WorkbenchTopBar(
         ActionChip("🔌 Conexiones", CircuitColors.Emerald, onNetlist)
         ActionChip("📤 Compartir / Guardar", CircuitColors.Cyan, onExport)
         ActionChip("🤖 ¿Está bien conectado?", CircuitColors.Amber, onAi)
+        ActionChip("🧩 Bloques Scratch", CircuitColors.Coral, onScratch)
     }
 }
 

@@ -13,6 +13,7 @@ enum class ComponentCategory(val title: String, val icon: String) {
     SENSOR("Sensores", "👁️"),
     DISPLAY("Pantallas y luces", "🖥️"),
     CONNECTOR("Conectores", "🔌"),
+    SCRATCH("Bloques Scratch", "🧩"),
     WIRE("Cable", "🔗")
 }
 
@@ -107,6 +108,8 @@ enum class ComponentType(
     DISPLAY_7SEG_8("Pantalla de números (8)", "🔢", "Muestra 8 números en fila", ComponentCategory.DISPLAY, 8),
     DISPLAY_7SEG_10("Pantalla de números (10)", "🔟", "Muestra 10 números en fila", ComponentCategory.DISPLAY, 10),
     LCD_16X2("Pantalla de texto", "📃", "Muestra 2 líneas de texto", ComponentCategory.DISPLAY, 16),
+    LCD_16X2_EDITABLE("Pantalla de texto editable", "📝", "Escribe texto en la pantalla táctil", ComponentCategory.DISPLAY, 16),
+    DISPLAY_7SEG_BCD("Display 7 seg BCD", "🔢", "Muestra números con decodificador BCD", ComponentCategory.DISPLAY, 8),
     OLED_SSD1306("Pantalla pequeña OLED", "🖥️", "Pantalla diminuta para dibujos y datos", ComponentCategory.DISPLAY, 4),
     LED_STRIP_WS2812("Tira de luces de colores", "🌈", "Muchos LEDs con color individual", ComponentCategory.DISPLAY, 3),
 
@@ -115,6 +118,15 @@ enum class ComponentType(
     TERMINAL_BLOCK("Bornera", "🔩", "Conector atornillado para cables gruesos", ComponentCategory.CONNECTOR, 2),
     JACK("Conector de audio", "🎧", "Entrada/salida de audio", ComponentCategory.CONNECTOR, 2),
     USB_CONNECTOR("Conector USB", "🔌", "Entrada de energía o datos USB", ComponentCategory.CONNECTOR, 4),
+
+    // ===== BLOQUES SCRATCH =====
+    SCRATCH_EVENT("Cuando Inicio", "🟢", "Inicia el programa al tocar bandera verde", ComponentCategory.IC, 1),
+    SCRATCH_LOOP("Repetir", "🔄", "Repite los bloques de adentro", ComponentCategory.IC, 1),
+    SCRATCH_IF("Si... Entonces", "🔀", "Ejecuta si la condición es verdadera", ComponentCategory.IC, 1),
+    SCRATCH_WAIT("Esperar", "⏱️", "Pausa el programa segundos", ComponentCategory.IC, 1),
+    SCRATCH_SET_PIN("Activar Pin", "📌", "Enciende/apaga un pin digital", ComponentCategory.IC, 2),
+    SCRATCH_READ_PIN("Leer Pin", "📖", "Lee el estado de un pin", ComponentCategory.IC, 2),
+    SCRATCH_MATH("Operación Matemática", "➕", "Suma, resta, multiplica, divide", ComponentCategory.IC, 3),
 
     // ===== ESPECIAL =====
     WIRE("Cable", "🔗", "Une dos puntos para que fluya la energía", ComponentCategory.WIRE, 2);
@@ -127,13 +139,15 @@ enum class ComponentType(
     /** ¿Es una pieza que emite luz? */
     val emitsLight: Boolean
         get() = this == LED || this == LED_STRIP_WS2812 || this == DISPLAY_7SEG_4 ||
-                this == DISPLAY_7SEG_8 || this == DISPLAY_7SEG_10
+                this == DISPLAY_7SEG_8 || this == DISPLAY_7SEG_10 ||
+                this == DISPLAY_7SEG_BCD || this == LCD_16X2_EDITABLE
 
     /** ¿Se puede cambiar alguna propiedad en el panel lateral? */
     val isConfigurable: Boolean
         get() = when (category) {
             ComponentCategory.PASSIVE, ComponentCategory.SEMICONDUCTOR,
-            ComponentCategory.CONTROL, ComponentCategory.IC, ComponentCategory.POWER -> true
+            ComponentCategory.CONTROL, ComponentCategory.IC, ComponentCategory.POWER,
+            ComponentCategory.SCRATCH -> true
             else -> false
         }
 
@@ -141,7 +155,9 @@ enum class ComponentType(
         /** Piezas que aparecen en el cajón rápido de la mesa de trabajo */
         val QUICK_ACCESS: List<ComponentType> = listOf(
             BATTERY, GROUND, RESISTOR, LED, CAPACITOR, SWITCH, TIMER_555,
-            POTENTIOMETER, DIODE, BJT_NPN, MOSFET_N, OPAMP
+            POTENTIOMETER, DIODE, BJT_NPN, MOSFET_N, OPAMP,
+            LOGIC_AND, LOGIC_OR, LOGIC_NOT, LOGIC_NAND, LOGIC_NOR, LOGIC_XOR,
+            SERVO, RELAY, TRANSISTOR_SWITCH, LCD_16X2_EDITABLE, DISPLAY_7SEG_BCD
         )
 
         /** Todas las piezas que se pueden colocar (sin WIRE) */

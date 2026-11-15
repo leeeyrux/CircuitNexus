@@ -140,6 +140,40 @@ data class CircuitComponent(
             ComponentType.DISPLAY_7SEG_8 -> ComponentProperties(displayDigits = 8, text = "00000000", brightness = 1f)
             ComponentType.DISPLAY_7SEG_10 -> ComponentProperties(displayDigits = 10, text = "0000000000", brightness = 1f)
             ComponentType.LCD_16X2 -> ComponentProperties(text = "CircuitNexus", brightness = 1f)
+            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f)
+            ComponentType.DISPLAY_7SEG_BCD -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
+            ComponentType.OLED_SSD1306 -> ComponentProperties(text = "Hola!", brightness = 1f)
+            ComponentType.LED_STRIP_WS2812 -> ComponentProperties(ledColor = "rainbow", brightness = 0.8f, resistanceOhms = 330f)
+
+            // Lógica 74HC
+            ComponentType.LOGIC_AND -> ComponentProperties(logicFunction = "AND")
+            ComponentType.LOGIC_OR -> ComponentProperties(logicFunction = "OR")
+            ComponentType.LOGIC_NOT -> ComponentProperties(logicFunction = "NOT")
+            ComponentType.LOGIC_NAND -> ComponentProperties(logicFunction = "NAND")
+            ComponentType.LOGIC_NOR -> ComponentProperties(logicFunction = "NOR")
+            ComponentType.LOGIC_XOR -> ComponentProperties(logicFunction = "XOR")
+
+            // Salidas avanzadas
+            ComponentType.SERVO -> ComponentProperties(pwmDuty = 0.5f, servoAngle = 90f)
+            ComponentType.RELAY -> ComponentProperties(isNormallyOpen = true, coilResistance = 400f)
+            ComponentType.TRANSISTOR_SWITCH -> ComponentProperties(thresholdVoltage = 2.0f, currentGain = 1f)
+
+            // Scratch blocks
+            ComponentType.SCRATCH_EVENT -> ComponentProperties()
+            ComponentType.SCRATCH_LOOP -> ComponentProperties()
+            ComponentType.SCRATCH_IF -> ComponentProperties()
+            ComponentType.SCRATCH_WAIT -> ComponentProperties()
+            ComponentType.SCRATCH_SET_PIN -> ComponentProperties()
+            ComponentType.SCRATCH_READ_PIN -> ComponentProperties()
+            ComponentType.SCRATCH_MATH -> ComponentProperties()
+
+            // Pantallas BCD y editable
+            ComponentType.DISPLAY_7SEG_BCD -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
+            ComponentType.LCD_16X2_EDITABLE -> ComponentProperties(displayDigits = 16, text = "", brightness = 1f)
+            ComponentType.DISPLAY_7SEG_4 -> ComponentProperties(displayDigits = 4, text = "0000", brightness = 1f)
+            ComponentType.DISPLAY_7SEG_8 -> ComponentProperties(displayDigits = 8, text = "00000000", brightness = 1f)
+            ComponentType.DISPLAY_7SEG_10 -> ComponentProperties(displayDigits = 10, text = "0000000000", brightness = 1f)
+            ComponentType.LCD_16X2 -> ComponentProperties(text = "CircuitNexus", brightness = 1f)
             ComponentType.OLED_SSD1306 -> ComponentProperties(text = "Hola!", brightness = 1f)
             ComponentType.LED_STRIP_WS2812 -> ComponentProperties(ledColor = "rainbow", brightness = 0.8f, resistanceOhms = 330f)
 

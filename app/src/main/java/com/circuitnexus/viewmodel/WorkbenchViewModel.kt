@@ -21,6 +21,7 @@ import com.circuitnexus.engine.CircuitEngine
 import com.circuitnexus.engine.DrcEngine
 import com.circuitnexus.engine.HelpCard
 import com.circuitnexus.engine.OfflineHelpEngine
+import com.circuitnexus.engine.ScratchEngine
 import com.circuitnexus.engine.transient.TransientEngine
 import com.circuitnexus.export.ExportEngine
 import com.circuitnexus.model.Circuit
@@ -83,6 +84,12 @@ class WorkbenchViewModel(
 
     private val _showLibrary = MutableStateFlow(false)
     val showLibrary = _showLibrary.asStateFlow()
+
+    private val _showScratch = MutableStateFlow(false)
+    val showScratch = _showScratch.asStateFlow()
+
+    private val _scratchEngine = MutableStateFlow(ScratchEngine.getInstance())
+    val scratchEngine = _scratchEngine.asStateFlow()
 
     private val _drcReport = MutableStateFlow<DrcEngine.DrcReport?>(null)
     val drcReport = _drcReport.asStateFlow()
@@ -829,6 +836,75 @@ class WorkbenchViewModel(
             runQuickReview()
         }
         hapticManager?.success()
+    }
+
+    // ===== Scratch =====
+
+    fun toggleScratch() {
+        _showScratch.value = !_showScratch.value
+        if (_showScratch.value) {
+            // Cargar programa de ejemplo
+            val exampleProgram = listOf(
+                ScratchEngine.ScratchBlock(
+                    id = 1,
+                    type = ScratchEngine.BlockType.EVENT_START,
+                    next = 2
+                ),
+                ScratchEngine.ScratchBlock(
+                    id = 2,
+                    type = ScratchEngine.BlockType.SET_PIN,
+                    params = mapOf("pinId" to 1L, "value" to true),
+                    next = 3
+                ),
+                ScratchEngine.ScratchBlock(
+                    id = 3,
+                    type = ScratchEngine.BlockType.WAIT,
+                    params = mapOf("ms" to 1000L),
+                    next = 4
+                ),
+                ScratchEngine.ScratchBlock(
+                    id = 4,
+                    type = ScratchEngine.BlockType.SET_PIN,
+                    params = mapOf("pinId" to 1L, "value" to false),
+                    next = 5
+                ),
+                ScratchEngine.ScratchBlock(
+                    id = 5,
+                    type = ScratchEngine.BlockType.LOOP_REPEAT,
+                    params = mapOf("count" to 5, "var" to "i"),
+                    children = listOf(
+                        ScratchEngine.ScratchBlock(
+                            id = 6,
+                            type = ScratchEngine.BlockType.SET_PIN,
+                            params = mapOf("pinId" to 1L, "value" to true),
+                            next = 7
+                        ),
+                        ScratchEngine.ScratchBlock(
+                            id = 7,
+                            type = ScratchEngine.BlockType.WAIT,
+                            params = mapOf("ms" to 500L),
+                            next = 8
+                        ),
+                        ScratchEngine.ScratchBlock(
+                            id = 8,
+                            type = ScratchEngine.BlockType.SET_PIN,
+                            params = mapOf("pinId" to 1L, "value" to false),
+                            next = 9
+                        ),
+                        ScratchEngine.ScratchBlock(
+                            id = 9,
+                            type = ScratchEngine.BlockType.WAIT,
+                            params = mapOf("ms" to 500L)
+                        )
+                    )
+                )
+            )
+            scratchEngine.loadProgram(exampleProgram)
+        }
+    }
+
+    fun closeScratch() {
+        _showScratch.value = false
     }
 
     // ===== Exportación =====

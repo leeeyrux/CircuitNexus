@@ -121,6 +121,23 @@ data class CircuitWire(
             ComponentType.LED_STRIP_WS2812 -> listOf("Energía +", "Tierra", "Datos")
             ComponentType.HEADER, ComponentType.TERMINAL_BLOCK, ComponentType.JACK -> listOf("Punto 1", "Punto 2")
             ComponentType.USB_CONNECTOR -> listOf("Energía +", "Tierra", "Datos +", "Datos −")
+            // ===== 74HC LÓGICA =====
+            ComponentType.LOGIC_AND, ComponentType.LOGIC_OR, ComponentType.LOGIC_XOR -> listOf("Entrada A", "Entrada B", "Salida")
+            ComponentType.LOGIC_OR -> listOf("Entrada A", "Entrada B", "Salida")
+            ComponentType.LOGIC_NOT -> listOf("Entrada", "Salida")
+            ComponentType.LOGIC_NAND, ComponentType.LOGIC_NOR -> listOf("Entrada A", "Entrada B", "Salida")
+            ComponentType.LOGIC_XOR -> listOf("Entrada A", "Entrada B", "Salida")
+            // ===== SALIDAS AVANZADAS =====
+            ComponentType.SERVO -> listOf("Energía +", "Tierra", "Señal PWM")
+            ComponentType.RELAY -> listOf("Bobina +", "Bobina −", "Contacto común", "Contacto abierto")
+            ComponentType.TRANSISTOR_SWITCH -> listOf("Colector/Drenaje", "Base/Puerta", "Emisor/Fuente")
+            // ===== PANTALLAS =====
+            ComponentType.LCD_16X2_EDITABLE -> listOf(
+                "Tierra", "Energía +", "Contraste", "Datos 0", "Datos 1", "Datos 2", "Datos 3",
+                "Datos 4", "Datos 5", "Datos 6", "Datos 7", "Elegir", "Leer/Escribir", "Habilitar",
+                "Luz +", "Luz −"
+            )
+            ComponentType.DISPLAY_7SEG_BCD -> listOf("A", "B", "C", "D", "E", "F", "G", "Punto")
             ComponentType.WIRE -> listOf("Punto 1", "Punto 2")
         }
 

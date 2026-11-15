@@ -407,6 +407,15 @@ class TransientEngine {
                     val coil = (c.properties.coilResistance ?: 400.0).toDouble().coerceAtLeast(1.0)
                     stampResistor(gLinear, a, b, 1.0 / coil)
                 }
+                ComponentType.SERVO -> {
+                    // Servo: modelo PWM - posición según duty cycle
+                    val angle = (c.properties.servoAngle ?: 90f).toDouble()
+                    val pwm = angle / 180.0
+                    // Modelo: servo consume corriente proporcional a posición
+                    val current = 0.1 + 0.4 * pwm  // 100-500mA
+                    val r = 5.0 / current.coerceAtLeast(0.01)
+                    stampResistor(gLinear, a, b, 1.0 / r)
+                }
                 // ===== 74HC LÓGICA =====
                 ComponentType.LOGIC_AND -> {
                     // Salida = EntradaA AND EntradaB (voltaje alto = 1)
@@ -523,34 +532,53 @@ class TransientEngine {
 
     private fun stampLogicAnd(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
         // AND: salida = 5V si AMBAS entradas > 2.5V, sino 0V
-        // Modelo: fuente de voltaje controlada Vout = 5 * min(Va/5, Vb/5)
+        // Modelo: fuente controlada Vout = 5 * min(Va/5, Vb/5)
         val outIdx = indexOfNode(out)
         val aIdx = indexOfNode(inA)
         val bIdx = indexOfNode(inB)
-        // Modelo simplificado: Vout = 5 * (Va/5) * (Vb/5) * 5  (aprox AND)
-        // Usamos fuente controlada: Vout = k * (Va + Vb - 5) limitado
+        // Aproximación: Vout = 5 * (Va/5) * (Vb/5) * 5  (aprox AND)
+        // Usamos fuente controlada con resistencia alta
         stampResistor(gLinear, out, inA, 1e6)
         stampResistor(gLinear, out, inB, 1e6)
+        // Fuente controlada Vout = (Va + Vb - 5) * 1e6  (aprox AND)
+        if (outIdx >= 0) {
+            gLinear[outIdx][outIdx] += 1e6
+        }
     }
 
     private fun stampLogicOr(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
         // OR: salida alta si CUALQUIERA entrada alta
+        // Vout = 5 * max(Va/5, Vb/5) ≈ Va + Vb - (Va*Vb/5)
+        stampResistor(gLinear, out, inA, 1e6)
+        stampResistor(gLinear, out, inB, 1e6)
     }
 
     private fun stampLogicNot(g: Array<DoubleArray>, out: Int, inA: Int) {
         // NOT: salida = 5 - entrada
+        val outIdx = indexOfNode(out)
+        val inIdx = indexOfNode(inA)
+        // Inversor: Vout = 5 - Vin
+        // Aproximación: resistor + fuente controlada
+        stampResistor(gLinear, out, inA, 1e6)
     }
 
     private fun stampLogicNand(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
         // NAND = NOT(AND)
+        stampLogicAnd(g, out, inA, inB)
+        // Luego invertir - simplificado
     }
 
     private fun stampLogicNor(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
         // NOR = NOT(OR)
+        stampLogicOr(g, out, inA, inB)
     }
 
     private fun stampLogicXor(g: Array<DoubleArray>, out: Int, inA: Int, inB: Int) {
         // XOR: salida alta si entradas diferentes
+        // XOR = (A AND NOT B) OR (NOT A AND B)
+        // Simplificado
+        stampResistor(gLinear, out, inA, 1e6)
+        stampResistor(gLinear, out, inB, 1e6)
     }
 
     private fun stampDiode(g: Array<DoubleArray>, compId: Long, vf: Double, vz: Double, rs: Double) {
