@@ -51,7 +51,7 @@ enum class MeterMode(
     V_AC("VAC", "Voltaje alterno", "∼", CircuitColors.Cyan),
     A_DC("mA", "Corriente", "⇢", CircuitColors.Emerald),
     OHM("Ω", "Resistencia", "Ω", CircuitColors.Amber),
-    CONT("•))", "Continuidad", "🔊", CircuitColors.Emerald),
+    CONT("•", "Continuidad", "🔊", CircuitColors.Emerald),
     DIODE("▷|", "Diodo", "▷|", CircuitColors.Amber),
     FREQ("Hz", "Frecuencia", "〰", CircuitColors.Coral)
 }
