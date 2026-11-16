@@ -3,16 +3,17 @@ package com.circuitnexus.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.PreferencesStore
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.preferencesDataStore
+import androidx.datastore.preferences.core.PreferencesStore
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("circuitnexus_prefs")
+private val Context.dataStore: DataStore<Preferences> by PreferencesStore("circuitnexus_prefs", Context.MODE_PRIVATE)
 
 /**
  * Preferencias de la app (clave de IA, vista de la mesa, temas...).

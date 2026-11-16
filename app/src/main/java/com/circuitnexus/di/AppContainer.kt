@@ -12,7 +12,7 @@ import com.circuitnexus.engine.CircuitEngine
 import com.circuitnexus.engine.OfflineHelpEngine
 import com.circuitnexus.engine.AiHelpEngine
 import com.circuitnexus.templates.CircuitTemplates
-import com.circuitnexus.util.HapticFeedback
+import com.circuitnexus.util.HapticManager
 import com.circuitnexus.viewmodel.TutorialViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +49,7 @@ class AppContainer(private val application: Application) {
     val tutorialViewModel = TutorialViewModel(settingsDataStore)
 
     // Haptics
-    val hapticManager = HapticFeedback.HapticManager(application)
+    val hapticManager = HapticManager(application)
 
     // Ayuda IA (opcional, se inicializa cuando hay API key)
     var aiHelpEngine: AiHelpEngine? = null

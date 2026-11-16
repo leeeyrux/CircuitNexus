@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.material3.MaterialTheme
 import com.circuitnexus.di.AppContainer
 import com.circuitnexus.navigation.AppNavHost
 import com.circuitnexus.ui.theme.CircuitNexusTheme
@@ -20,8 +22,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             CircuitNexusTheme {
                 Surface(
-                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavHost(container = container)
                 }
