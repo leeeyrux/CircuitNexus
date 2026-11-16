@@ -94,9 +94,9 @@ class AiHelpEngine(
         val compDesc = components.joinToString("\n") { comp ->
             val props = comp.properties
             val extra = when (comp.type) {
-                ComponentType.RESISTOR -> " (${props.resistanceOhms?.roundToInt()} Ω)"
-                ComponentType.CAPACITOR -> " (${(props.capacitanceFarads ?: 0f * 1e6).roundToInt()} µF)"
-                ComponentType.BATTERY -> " (${props.voltageVolts?.roundToInt()}V)"
+                ComponentType.RESISTOR -> " (${(props.resistanceOhms ?: 0f).toInt()} Ω)"
+                ComponentType.CAPACITOR -> " (${((props.capacitanceFarads ?: 0f) * 1e6).toInt()} µF)"
+                ComponentType.BATTERY -> " (${(props.voltageVolts ?: 0f).toInt()}V)"
                 ComponentType.LED -> " (${props.ledColor ?: "rojo"}, ${props.ledForwardVoltage}V)"
                 ComponentType.TIMER_555 -> " (${props.timerMode}, ${props.frequencyHz}Hz)"
                 else -> ""
@@ -105,13 +105,17 @@ class AiHelpEngine(
         }
 
         val wireDesc = if (wires.isNotEmpty()) {
-            wires.joinToString("\n") { "Cable: ${it.fromComponentId}[${it.fromPinIndex}] → ${it.toComponentId}[${it.toPinIndex}]" }
+            wires.joinToString("\n") { wire ->
+                "Cable: ${wire.fromComponentId}[${wire.fromPinIndex}] → ${wire.toComponentId}[${wire.toPinIndex}]"
+            }
         } else {
             "Ninguno"
         }
 
         val voltageInfo = state?.nodeVoltages?.let { voltages ->
-            voltages.joinToString(", ") { "(Nodo ${it.key}: ${it.value.roundToInt()}V)" }
+            voltages.joinToString(", ") { voltage ->
+                "(Nodo ${voltage.key}: ${voltage.value.toInt()}V)"
+            }
         } ?: "Simulación no ejecutada"
 
         return """

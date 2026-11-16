@@ -60,12 +60,7 @@ class HapticManager(private val context: Context) {
     
     private fun trigger(effect: VibrationEffect) {
         if (!_enabled.value) return
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            vibrator.vibrate(effect)
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(effect.getDuration())
-        }
+        vibrator.vibrate(effect)
     }
     
     // === Compatibilidad con HapticFeedbackConstants (para Views) ===
