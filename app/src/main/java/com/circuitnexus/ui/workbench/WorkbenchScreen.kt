@@ -273,7 +273,7 @@ fun WorkbenchScreen(
                 .padding(top = 74.dp, start = 12.dp, end = 12.dp)
         ) {
             if (connecting == null && selectedId == null && helpCards.isNotEmpty()) {
-                HelpBanner(helpCards.first())
+                HelpBanner(helpCards[0])
             }
         }
 

@@ -48,7 +48,7 @@ class TutorialViewModel(private val settings: SettingsDataStore) : ViewModel() {
     
     fun startTutorial(tutorialId: String) {
         val tutorial = availableTutorials.find { it.id == tutorialId } ?: return
-        _currentTutorial.value = tutorial.steps.first()
+        _currentTutorial.value = tutorial.steps[0]
         _currentStepIndex.value = 0
         _tutorialState.value = TutorialState()
         _isActive.value = true

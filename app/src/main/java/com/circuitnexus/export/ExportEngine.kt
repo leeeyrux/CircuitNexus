@@ -106,7 +106,7 @@ object ExportEngine {
         sb.appendLine("  (title_block (title \"${circuit.name}\") (comment 1 \"Generado por CircuitNexus\"))")
 
         for (comp in components) {
-            val ref = "${comp.type.name.first()}${comp.id}"
+            val ref = "${comp.type.name[0]}${comp.id}"
             sb.appendLine("  (symbol (lib_id \"CircuitNexus:${comp.type.name}\")")
             sb.appendLine("    (at ${comp.position.x} ${comp.position.y} ${comp.position.rotation})")
             sb.appendLine("    (unit 1)")
