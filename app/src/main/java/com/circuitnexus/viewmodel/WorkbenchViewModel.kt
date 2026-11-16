@@ -899,7 +899,7 @@ class WorkbenchViewModel(
                     )
                 )
             )
-            scratchEngine.loadProgram(exampleProgram)
+            _scratchEngine.value.loadProgram(exampleProgram)
         }
     }
 
