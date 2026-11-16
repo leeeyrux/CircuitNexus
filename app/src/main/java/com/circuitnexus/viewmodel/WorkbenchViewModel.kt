@@ -37,7 +37,7 @@ import com.circuitnexus.templates.CircuitTemplate
 import com.circuitnexus.ui.oscilloscope.ScopeChannel
 import com.circuitnexus.ui.tutorial.TutorialStep
 import com.circuitnexus.ui.theme.CircuitColors
-import com.circuitnexus.util.HapticFeedback
+import com.circuitnexus.util.HapticFeedback.HapticManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -557,8 +557,8 @@ class WorkbenchViewModel(
             _components.value.find { it.id == componentId }?.let { repository.updateComponent(it) }
         }
     }
-
-    fun deleteComponent(componentId: Long) {
+    
+    override fun deleteComponent(componentId: Long) {
         val comp = _components.value.find { it.id == componentId } ?: return
         historyManager.executeCommand(
             DeleteComponentCommand(this, comp, getWiresConnectedToComponent(componentId))
@@ -700,7 +700,7 @@ class WorkbenchViewModel(
         _connectingWireStart.value = null
     }
 
-    fun deleteWire(wireId: Long) {
+    override fun deleteWire(wireId: Long) {
         val wire = _wires.value.find { it.id == wireId } ?: return
         historyManager.executeCommand(DeleteWireCommand(this, wire))
         viewModelScope.launch { repository.deleteWire(wireId) }
